@@ -1,0 +1,45 @@
+﻿<Window
+    x:Class="WpfApp1.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:WpfApp1"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:wpf="clr-namespace:LazyRegion.WPF;assembly=LazyRegion.WPF"
+    Title="MainWindow"
+    Width="800"
+    Height="450"
+    mc:Ignorable="d">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <wpf:LazyRegion x:Name="region" RegionName="Root" />
+        <StackPanel Grid.Row="1">
+            <WrapPanel Orientation="Horizontal">
+                <RadioButton
+                    Checked="RadioButton_Checked"
+                    Content="None"
+                    IsChecked="True" />
+                <RadioButton Checked="RadioButton_Checked" Content="Fade" />
+                <RadioButton Checked="RadioButton_Checked" Content="NewFromLeft" />
+                <RadioButton Checked="RadioButton_Checked" Content="NewFromRight" />
+                <RadioButton Checked="RadioButton_Checked" Content="NewFromUp" />
+                <RadioButton Checked="RadioButton_Checked" Content="NewFromDown" />
+                <RadioButton Checked="RadioButton_Checked" Content="SlideLeft" />
+                <RadioButton Checked="RadioButton_Checked" Content="SlideRight" />
+                <RadioButton Checked="RadioButton_Checked" Content="SlideUp" />
+                <RadioButton Checked="RadioButton_Checked" Content="SlideDown" />
+                <RadioButton Checked="RadioButton_Checked" Content="Scale" />
+                <RadioButton Checked="RadioButton_Checked" Content="ZoomIn" />
+                <RadioButton Checked="RadioButton_Checked" Content="ZoomOut" />
+            </WrapPanel>
+            <Button
+                Width="100"
+                Height="50"
+                Click="Button_Click"
+                Content="변환" />
+        </StackPanel>
+    </Grid>
+</Window>
