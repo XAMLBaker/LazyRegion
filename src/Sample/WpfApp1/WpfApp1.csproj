@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LazyRegion.WPF\LazyRegion.WPF.csproj" />
+    <ProjectReference Include="..\..\LazyRegion.WPF\LazyRegion.WPF.csproj" />
   </ItemGroup>
 
 </Project>

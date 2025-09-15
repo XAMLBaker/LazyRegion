@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.Core", "LazyRegion.Core\LazyRegion.Core.csproj", "{B0BEA3AE-E42A-4832-A0AA-5E4DA761F45A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.Core", "src\LazyRegion.Core\LazyRegion.Core.csproj", "{B0BEA3AE-E42A-4832-A0AA-5E4DA761F45A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.WPF", "LazyRegion.WPF\LazyRegion.WPF.csproj", "{93627A9D-D32A-480F-994D-79F1AD963D31}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.WPF", "src\LazyRegion.WPF\LazyRegion.WPF.csproj", "{93627A9D-D32A-480F-994D-79F1AD963D31}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp1", "WpfApp1\WpfApp1.csproj", "{97BBA8FA-AA60-47A4-BF0D-0C43CCC8482B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp1", "src\Sample\WpfApp1\WpfApp1.csproj", "{97BBA8FA-AA60-47A4-BF0D-0C43CCC8482B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTemplateChange", "DataTemplateChange\DataTemplateChange.csproj", "{75E1D130-D244-4D89-99AD-56E9B245B18E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTemplateChange", "src\Sample\DataTemplateChange\DataTemplateChange.csproj", "{75E1D130-D244-4D89-99AD-56E9B245B18E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfApp2", "src\Sample\WpfApp2\WpfApp2.csproj", "{2830BAB2-5E62-45A5-BCE1-2CBD093256A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +37,10 @@ Global
 		{75E1D130-D244-4D89-99AD-56E9B245B18E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75E1D130-D244-4D89-99AD-56E9B245B18E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75E1D130-D244-4D89-99AD-56E9B245B18E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2830BAB2-5E62-45A5-BCE1-2CBD093256A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2830BAB2-5E62-45A5-BCE1-2CBD093256A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2830BAB2-5E62-45A5-BCE1-2CBD093256A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2830BAB2-5E62-45A5-BCE1-2CBD093256A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -42,6 +48,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{97BBA8FA-AA60-47A4-BF0D-0C43CCC8482B} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 		{75E1D130-D244-4D89-99AD-56E9B245B18E} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
+		{2830BAB2-5E62-45A5-BCE1-2CBD093256A9} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96F9E939-F1E3-409C-BF26-593CAC1AEE7C}

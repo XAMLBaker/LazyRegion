@@ -1,0 +1,51 @@
+﻿<Window
+    x:Class="WpfApp2.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:WpfApp2"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:WpfApp2.ViewModels"
+    xmlns:wpf="clr-namespace:LazyRegion.WPF;assembly=LazyRegion.WPF"
+    Title="MainWindow"
+    Width="800"
+    Height="450"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:AViewModel}">
+            <UserControl
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Background="Red"
+                Foreground="white">
+                여기는 AContentControl
+            </UserControl>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:BViewModel}">
+            <UserControl
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Background="Blue"
+                Foreground="white">
+                여기는 BContentControl
+            </UserControl>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <wpf:LazyRegion Content="{Binding CurrentViewModel}" TransitionAnimation="{Binding SelectAnimationType}" />
+        <StackPanel Grid.Row="1">
+            <ComboBox ItemsSource="{Binding TransitionAnimations}" SelectedItem="{Binding SelectAnimationType}" />
+
+            <Button
+                Width="100"
+                Height="50"
+                Command="{Binding GoCommand}"
+                Content="변환" />
+        </StackPanel>
+    </Grid>
+</Window>
