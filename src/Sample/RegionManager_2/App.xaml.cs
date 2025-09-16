@@ -32,5 +32,4 @@ namespace RegionManager_2
             mainWindow.Show ();
         }
     }
-
 }

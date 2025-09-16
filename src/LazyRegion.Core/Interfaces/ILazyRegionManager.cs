@@ -9,8 +9,8 @@ namespace LazyRegion.Core;
 public interface ILazyRegionManager
 {
     void RegisterRegion(string regionName, ILazyRegion region);
-    Task NavigateAsync(string regionName, string viewKey);
-    Task NavigateAsync<T>(string regionName, string viewKey);
+    Task NavigateAsync(string regionName, string viewKey, TimeSpan? regionWaitTimeout = null);
+    Task NavigateAsync<T>(string regionName, string viewKey, TimeSpan? regionWaitTimeout = null);
     void RegisterView<T>(string viewKey, ServiceLifetime lifetime = ServiceLifetime.Transient)
         where T : class, new();
 }
@@ -46,13 +46,23 @@ public class LazyRegionService : ILazyRegionManager
         };
     }
 
-    private async Task<ILazyRegion> GetRegionAsync(string regionName)
+    private async Task<ILazyRegion> GetRegionAsync(string regionName, TimeSpan? regionWaitTimeout = null)
     {
         if (_regions.TryGetValue (regionName, out var region))
             return region;
 
         // Region이 등록될 때까지 대기
         var tcs = _regionWaiters.GetOrAdd (regionName, _ => new TaskCompletionSource<ILazyRegion> ());
+
+        var actualTimeout = regionWaitTimeout ?? TimeSpan.FromSeconds (30); // 기본 30초
+
+        var timeoutTask = Task.Delay (actualTimeout);
+        var completedTask = await Task.WhenAny (tcs.Task, timeoutTask);
+
+        if (completedTask == timeoutTask)
+        {
+            throw new TimeoutException ($"등록되지 않은 Region : {regionName} 입니다.");
+        }
         return await tcs.Task;
     }
 
@@ -68,14 +78,14 @@ public class LazyRegionService : ILazyRegionManager
         }
     }
 
-    public async Task NavigateAsync(string regionName, string viewKey)
+    public async Task NavigateAsync(string regionName, string viewKey, TimeSpan? timeout = null)
     {
         var region = await GetRegionAsync (regionName);
 
         region.Set(await GetOrCreateView (viewKey));
     }
 
-    public async Task NavigateAsync<T>(string regionName, string viewKey)
+    public async Task NavigateAsync<T>(string regionName, string viewKey, TimeSpan? timeout = null)
     {
         var region = await GetRegionAsync (regionName);
 
