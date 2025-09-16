@@ -31,8 +31,7 @@ public partial class MainViewModel : ObservableObject
     {
         this._lazyRegionManager = lazyRegionManager;
         
-        // 주의! 화면 생성되기도 전부터 화면을 그릴 수 없기에 사용할 수 없음
-        //Run ();
+        Run ();
     }
 
     int idx = 0;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ public interface ILazyRegionManager
 
 public class LazyRegionService : ILazyRegionManager
 {
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<ILazyRegion>> _regionWaiters = new ();
     private readonly IServiceProvider _serviceProvider;
     private readonly Dictionary<string, ViewRegistration> _viewRegistrations = new ();
     private readonly Dictionary<string, object> _singletonCache = new ();
@@ -44,24 +46,39 @@ public class LazyRegionService : ILazyRegionManager
         };
     }
 
+    private async Task<ILazyRegion> GetRegionAsync(string regionName)
+    {
+        if (_regions.TryGetValue (regionName, out var region))
+            return region;
+
+        // Region이 등록될 때까지 대기
+        var tcs = _regionWaiters.GetOrAdd (regionName, _ => new TaskCompletionSource<ILazyRegion> ());
+        return await tcs.Task;
+    }
+
+    // Region 등록 시 호출
     public void RegisterRegion(string regionName, ILazyRegion region)
     {
         _regions[regionName] = region;
+
+        // 대기 중인 Task들에게 알림
+        if (_regionWaiters.TryRemove (regionName, out var tcs))
+        {
+            tcs.SetResult (region);
+        }
     }
 
     public async Task NavigateAsync(string regionName, string viewKey)
     {
-        if (!_regions.TryGetValue (regionName, out var region))
-            throw new InvalidOperationException ($"Region '{regionName}' not found");
+        var region = await GetRegionAsync (regionName);
 
         region.Set(await GetOrCreateView (viewKey));
     }
 
     public async Task NavigateAsync<T>(string regionName, string viewKey)
     {
-        if (!_regions.TryGetValue (regionName, out var region))
-            throw new InvalidOperationException ($"Region '{regionName}' not found");
-        
+        var region = await GetRegionAsync (regionName);
+
         var vm = this._serviceProvider.GetService<T> ();
         if(vm == null)
             throw new InvalidOperationException ($"ViewModel Not found");
