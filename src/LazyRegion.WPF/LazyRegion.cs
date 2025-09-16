@@ -296,8 +296,11 @@ public class LazyRegion : ContentControl, ILazyRegion
         sb.Children.Add (animY);
     }
 
-    public void SetContent(object content)
+    public void Set(object content, object dataContext = null)
     {
         this.Content = content;
+        if (dataContext == null)
+            return;
+        this._currentPresenter.DataContext = dataContext;
     }
 }

@@ -2,5 +2,5 @@
 
 public interface ILazyRegion
 {
-    void SetContent(object content);
+    void Set(object content, object dataContext = null);
 }

@@ -9,6 +9,7 @@ public interface ILazyRegionManager
 {
     void RegisterRegion(string regionName, ILazyRegion region);
     Task NavigateAsync(string regionName, string viewKey);
+    Task NavigateAsync<T>(string regionName, string viewKey);
     void RegisterView<T>(string viewKey, ServiceLifetime lifetime = ServiceLifetime.Transient)
         where T : class, new();
 }
@@ -53,7 +54,20 @@ public class LazyRegionService : ILazyRegionManager
         if (!_regions.TryGetValue (regionName, out var region))
             throw new InvalidOperationException ($"Region '{regionName}' not found");
 
-        region.SetContent(await GetOrCreateView (viewKey));
+        region.Set(await GetOrCreateView (viewKey));
+    }
+
+    public async Task NavigateAsync<T>(string regionName, string viewKey)
+    {
+        if (!_regions.TryGetValue (regionName, out var region))
+            throw new InvalidOperationException ($"Region '{regionName}' not found");
+        
+        var vm = this._serviceProvider.GetService<T> ();
+        if(vm == null)
+            throw new InvalidOperationException ($"ViewModel Not found");
+
+        var viewType = await GetOrCreateView (viewKey);
+        region.Set (viewType, vm);
     }
 
     private async Task<object> GetOrCreateView(string viewKey)
