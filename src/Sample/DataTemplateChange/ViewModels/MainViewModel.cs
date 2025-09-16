@@ -1,10 +1,18 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LazyRegion.Core;
-using System.Security.Policy;
-using System.Windows.Controls;
 
 namespace DataTemplateChange.ViewModels;
+
+public partial class AViewModel : ObservableObject
+{
+
+}
+
+public partial class BViewModel : ObservableObject
+{
+
+}
 
 public partial class MainViewModel : ObservableObject
 {
@@ -27,28 +35,29 @@ public partial class MainViewModel : ObservableObject
         TransitionAnimation.ZoomIn,
         TransitionAnimation.ZoomOut
     };
+    private List<ObservableObject> views = new ();
 
     public MainViewModel()
     {
-        this.CurrentViewModel = Activator.CreateInstance (views[idx++]);
+        views.Add (new AViewModel ());
+        views.Add (new BViewModel ());
+
+        Run ();
     }
-    private Type[] views = new Type[] { typeof(AViewModel), typeof (BViewModel)};
+   
     int idx = 0;
+
     [RelayCommand]
     private void Go()
     {
         if (idx == 2)
             idx = 0;
-        this.CurrentViewModel = Activator.CreateInstance(views[idx++]);
+
+        Run ();
     }
-}
 
-public partial class AViewModel : ObservableObject
-{
-
-}
-
-public partial class BViewModel : ObservableObject
-{
-
+    private void Run()
+    {
+        this.CurrentViewModel = views[idx++];
+    }
 }

@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace WpfApp1.Views
+namespace SampleScreen.Base
 {
     /// <summary>
-    /// AControl.xaml에 대한 상호 작용 논리
+    /// ScreenB.xaml에 대한 상호 작용 논리
     /// </summary>
-    public partial class AControl : UserControl
+    public partial class ScreenB : Border
     {
-        public AControl()
+        public ScreenB()
         {
             InitializeComponent ();
         }

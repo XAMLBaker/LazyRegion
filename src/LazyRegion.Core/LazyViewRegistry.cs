@@ -9,21 +9,19 @@ namespace LazyRegion.Core
         private readonly List<(Type ViewType, string Key, ServiceLifetime Lifetime)> _views = new ();
 
         public void Add<T>(string key, ServiceLifetime lifetime) where T : class, new()
-            => _views.Add ((typeof (T), key, lifetime));
-        public LazyViewRegistry()
         {
-            
+            _views.Add ((typeof (T), key, lifetime));
+            _registrations.Add ((rm) => rm.RegisterView<T> (key, lifetime)); // ✅ 미리 delegate 저장
         }
+
         public void Initialize(ILazyRegionManager regionManager)
         {
-            foreach (var v in _views)
+            foreach (var action in _registrations)
             {
-                var method = typeof (ILazyRegionManager)
-                    .GetMethod (nameof (ILazyRegionManager.RegisterView))
-                    ?.MakeGenericMethod (v.ViewType);
-
-                method?.Invoke (regionManager, new object[] { v.Key, v.Lifetime });
+                action (regionManager); // ✅ 리플렉션 안 씀
             }
         }
+
+        private readonly List<Action<ILazyRegionManager>> _registrations = new ();
     }
 }

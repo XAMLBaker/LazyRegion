@@ -10,7 +10,6 @@ public static class LazyExtensions
         services.AddSingleton<ILazyRegionManager, LazyRegionService> ();
         return services;
     }
-
     public static IServiceCollection AddLazyView<T>(this IServiceCollection services, string viewKey, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         where T : class, new()
     {

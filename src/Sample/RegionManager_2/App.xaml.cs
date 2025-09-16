@@ -1,9 +1,10 @@
 ﻿using LazyRegion.Core;
 using Microsoft.Extensions.DependencyInjection;
+using RegionManager_2.ViewModels;
+using SampleScreen.Base;
 using System.Windows;
-using WpfApp1.Views;
 
-namespace WpfApp1
+namespace RegionManager_2
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -16,9 +17,11 @@ namespace WpfApp1
         {
             var serviceCollection = new ServiceCollection ();
             serviceCollection.UseLazyRegion ();
-            serviceCollection.AddLazyView<AControl> ("a");
-            serviceCollection.AddLazyView<BControls> ("b");
-            serviceCollection.AddTransient<MainWindow> ();
+
+            serviceCollection.AddLazyView<ScreenA> ("a");
+            serviceCollection.AddLazyView<ScreenB> ("b");
+            serviceCollection.AddSingleton<MainViewModel> ();
+            serviceCollection.AddSingleton<MainWindow> ();
 
             Services = serviceCollection.BuildServiceProvider ();
         }
@@ -29,4 +32,5 @@ namespace WpfApp1
             mainWindow.Show ();
         }
     }
+
 }

@@ -9,12 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <ProjectReference Include="..\SampleScreen\SampleScreen.csproj" />
+    <ProjectReference Include="..\..\LazyRegion.WPF\LazyRegion.WPF.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SampleScreen\SampleScreen.csproj" />
-    <ProjectReference Include="..\..\LazyRegion.WPF\LazyRegion.WPF.csproj" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
   </ItemGroup>
 
 </Project>

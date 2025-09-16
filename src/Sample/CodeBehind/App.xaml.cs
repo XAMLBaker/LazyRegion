@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace WpfApp2
+namespace CodeBehind
 {
     /// <summary>
     /// Interaction logic for App.xaml
