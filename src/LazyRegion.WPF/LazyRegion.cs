@@ -1,4 +1,4 @@
-using LazyRegion.Core;
+ï»¿using LazyRegion.Core;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -39,7 +39,7 @@ public class LazyRegion : ContentControl, ILazyRegion
 
     private bool _isNavigating;
 
-    // Staging ¹æ½Ä: ÇöÀç Ç¥½ÃµÇ´Â presenter¿Í ÁØºñ ÁßÀÎ presenter
+    // Staging ë°©ì‹: í˜„ì¬ í‘œì‹œë˜ëŠ” presenterì™€ ì¤€ë¹„ ì¤‘ì¸ presenter
     private ContentControl _currentPresenter;
     private ContentControl _stagingPresenter;
 
@@ -59,19 +59,19 @@ public class LazyRegion : ContentControl, ILazyRegion
         var presenter1 = GetTemplateChild ("PART_Content1") as ContentControl;
         var presenter2 = GetTemplateChild ("PART_Content2") as ContentControl;
 
-        // ÃÊ±â »óÅÂ ¼³Á¤
+        // ì´ˆê¸° ìƒíƒœ ì„¤ì •
         if (presenter1 != null && presenter2 != null)
         {
-            // Ã³À½¿¡´Â presenter1À» current·Î, presenter2¸¦ stagingÀ¸·Î ¼³Á¤
+            // ì²˜ìŒì—ëŠ” presenter1ì„ currentë¡œ, presenter2ë¥¼ stagingìœ¼ë¡œ ì„¤ì •
             _currentPresenter = presenter1;
             _stagingPresenter = presenter2;
 
-            // ÇöÀç Ç¥½ÃµÉ ³»¿ëÀ» current¿¡ ¼³Á¤
+            // í˜„ì¬ í‘œì‹œë  ë‚´ìš©ì„ currentì— ì„¤ì •
             _currentPresenter.Content = Content;
             _currentPresenter.Visibility = Visibility.Visible;
             _currentPresenter.Opacity = 1;
 
-            // stagingÀº ¼û±è
+            // stagingì€ ìˆ¨ê¹€
             _stagingPresenter.Visibility = Visibility.Collapsed;
             _stagingPresenter.Opacity = 1;
         }
@@ -83,11 +83,16 @@ public class LazyRegion : ContentControl, ILazyRegion
 
         if (_currentPresenter == null || _stagingPresenter == null)
             return;
-
-        if (_isNavigating)
+        // â­ï¸ Dispatcherë¥¼ ì‚¬ìš©í•˜ì—¬ UI ìŠ¤ë ˆë“œ ì ‘ê·¼ì„ ë³´ì¥
+        // Content ë³€ê²½ ì´ë²¤íŠ¸ê°€ UI ìŠ¤ë ˆë“œê°€ ì•„ë‹Œ ê³³ì—ì„œ ë°œìƒí–ˆë”ë¼ë„ ì•ˆì „í•˜ê²Œ ì²˜ë¦¬í•©ë‹ˆë‹¤.
+        if (!this.Dispatcher.CheckAccess ())
+        {
+            this.Dispatcher.Invoke (async () => await InternalNavigation (newContent));
             return;
+        }
 
-        await this.Navigation (newContent);
+        // ì´ë¯¸ UI ìŠ¤ë ˆë“œì¸ ê²½ìš° (ê¸°ì¡´ ë¡œì§)
+        await InternalNavigation (newContent);
     }
 
     private static void OnRegionNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -120,9 +125,14 @@ public class LazyRegion : ContentControl, ILazyRegion
         presenter.BeginAnimation (UIElement.OpacityProperty, null);
         presenter.Opacity = 1.0;
     }
+    // â­ï¸ ê¸°ì¡´ Navigation ë¡œì§ì„ ë³„ë„ì˜ private ë©”ì„œë“œë¡œ ë¶„ë¦¬
+    private async Task InternalNavigation(object newContent)
+    {
+        if (_isNavigating)
+            return;
 
-    private TaskCompletionSource<bool> _animationCompletionSource;
-
+        await this.Navigation (newContent); // ê¸°ì¡´ Navigation ë¡œì§ í˜¸ì¶œ
+    }
     private async Task Navigation(object newContent)
     {
         _isNavigating = true;
@@ -133,27 +143,31 @@ public class LazyRegion : ContentControl, ILazyRegion
         }
         else
         {
-            // ViewModelÀÌ³ª ´Ù¸¥ °´Ã¼ÀÎ °æ¿ì
+            // ViewModelì´ë‚˜ ë‹¤ë¥¸ ê°ì²´ì¸ ê²½ìš°
             _stagingPresenter.Content = newContent;
         }
-
-        // 2. ¾Ö´Ï¸ŞÀÌ¼Ç ÁØºñ
-        var duration = TransitionDuration.TimeSpan;
-        var sb = new Storyboard ();
-        _animationCompletionSource = new TaskCompletionSource<bool> ();
-
-        sb.Completed += (_, __) =>
+        if (TransitionAnimation != TransitionAnimation.None)
         {
-            _animationCompletionSource.SetResult (true);
-        };
-        // 3. ¾Ö´Ï¸ŞÀÌ¼Ç Å¸ÀÔ¿¡ µû¸¥ Ã³¸®
-        PrepareAnimation (sb, _currentPresenter, _stagingPresenter, duration);
+            // 2. ì• ë‹ˆë©”ì´ì…˜ ì¤€ë¹„
+            var duration = TransitionDuration.TimeSpan;
+            var sb = new Storyboard ();
+            var tcs = new TaskCompletionSource<bool> ();
 
-        // 4. ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà
-        sb.Begin ();
-        await _animationCompletionSource.Task;
+            sb.Completed += (_, __) =>
+            {
+                if (!tcs.Task.IsCompleted)
+                {
+                    tcs.SetResult (true);
+                }
+            };
+            // 3. ì• ë‹ˆë©”ì´ì…˜ íƒ€ì…ì— ë”°ë¥¸ ì²˜ë¦¬
+            PrepareAnimation (sb, _currentPresenter, _stagingPresenter, duration);
 
-        // 5. ¾Ö´Ï¸ŞÀÌ¼Ç ¿Ï·á ÈÄ Á¤¸®
+            // 4. ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰
+            sb.Begin ();
+            await tcs.Task;
+        }
+        // 5. ì• ë‹ˆë©”ì´ì…˜ ì™„ë£Œ í›„ ì •ë¦¬
         CompleteTransition ();
 }
 
@@ -163,7 +177,7 @@ public class LazyRegion : ContentControl, ILazyRegion
         ResetInitTransforms (_currentPresenter);
         ResetInitTransforms (_stagingPresenter);
 
-        // Z-Index ÃÊ±âÈ­
+        // Z-Index ì´ˆê¸°í™”
         Panel.SetZIndex (outgoing, 0);
         Panel.SetZIndex (incoming, 1);
 
@@ -229,7 +243,7 @@ public class LazyRegion : ContentControl, ILazyRegion
                 break;
 
             default:
-                // ¾Ö´Ï¸ŞÀÌ¼Ç ¾øÀ½ - Áï½Ã ÀüÈ¯
+                // ì• ë‹ˆë©”ì´ì…˜ ì—†ìŒ - ì¦‰ì‹œ ì „í™˜
                 break;
         }
     }
