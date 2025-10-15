@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using LazyRegion.Core;
 
-namespace RegionManager_ConfigureInitalNavigation.ViewModels;
+namespace RegionManager_RegionState.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
@@ -32,7 +32,7 @@ public partial class MainViewModel : ObservableObject
         this._lazyRegionManager = lazyRegionManager;
     }
 
-    int idx = 1;
+    int idx = 0;
 
     [RelayCommand]
     private async Task Go()
@@ -41,9 +41,5 @@ public partial class MainViewModel : ObservableObject
             idx = 0;
 
         await this._lazyRegionManager.NavigateAsync ("Root", views[idx++]);
-    }
-
-    private void Run()
-    {
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace LazyRegion.Core;
 
@@ -27,7 +26,7 @@ public static class LazyExtensions
         services.AddSingleton<ILazyRegionManager> (sp =>
         {
             var registry = sp.GetRequiredService<LazyViewRegistry> ();
-            var manager = new LazyRegionManager (sp, registry);
+            var manager = new LazyRegionManager (sp, registry, _regionLoadingConfigs);
 
             // ✅ 저장된 Navigation들 실행
             foreach (var navigation in _pendingNavigations)
@@ -35,7 +34,9 @@ public static class LazyExtensions
                 navigation (manager);
             }
             _pendingNavigations.Clear ();
-
+            // ⭐ ConfigureRegions에서 등록한 초기화 실행
+            var initializers = sp.GetService<Action<ILazyRegionManager>> ();
+            initializers?.Invoke (manager);
             return manager;
         });
         return services;
@@ -52,7 +53,31 @@ public static class LazyExtensions
         _pendingRegistrations.Add (registry => registry.Add<T> (viewKey, lifetime));
         return services;
     }
+    private static Dictionary<string, RegionLoadingConfig>? _regionLoadingConfigs;
 
+    public static IServiceCollection ConfigureRegions(
+        this IServiceCollection services,
+        Action<IRegionConfigurationBuilder> configure)
+    {
+        var builder = new RegionConfigurationBuilder (services);
+        configure (builder);
+
+        _regionLoadingConfigs = builder.Build ();
+
+        // DI에 설정 등록
+        services.AddSingleton (_regionLoadingConfigs);
+        // ⭐ 초기화 시 실행될 액션 저장
+        services.AddSingleton<Action<ILazyRegionManager>> (manager =>
+        {
+            LazyRegionRegistry.SetLoadingConfigs (_regionLoadingConfigs, manager);
+        });
+        return services;
+    }
+
+    public static RegionLoadingConfig? GetLoadingConfig(string regionName)
+    {
+        return _regionLoadingConfigs?.GetValueOrDefault (regionName);
+    }
     public static IServiceCollection ConfigureInitialNavigation(
                 this IServiceCollection services,
                 Action<ILazyRegionManagerBase> configure)
