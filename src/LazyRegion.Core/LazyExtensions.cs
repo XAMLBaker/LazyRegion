@@ -55,7 +55,7 @@ public static class LazyExtensions
 
     public static IServiceCollection ConfigureInitialNavigation(
                 this IServiceCollection services,
-                Action<ILazyRegionManager> configure)
+                Action<ILazyRegionManagerBase> configure)
     {
         // ✅ 일단 static에 저장
         _pendingNavigations.Add (configure);

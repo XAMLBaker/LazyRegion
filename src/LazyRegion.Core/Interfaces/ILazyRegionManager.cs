@@ -1,26 +1,27 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LazyRegion.Core;
 
-public interface ILazyRegionManager
+public interface ILazyRegionManagerBase
 {
-    void RegisterRegion(string regionName, ILazyRegion region);
     Task NavigateAsync(string regionName, string viewKey, TimeSpan? regionWaitTimeout = null);
     Task NavigateAsync<T>(string regionName, string viewKey, TimeSpan? regionWaitTimeout = null);
+}
+
+public interface ILazyRegionManager : ILazyRegionManagerBase
+{
     void RegisterView<T>(string viewKey, ServiceLifetime lifetime = ServiceLifetime.Transient)
         where T : class, new();
 }
 
 public class LazyRegionManager : ILazyRegionManager
 {
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<ILazyRegion>> _regionWaiters = new ();
     private readonly IServiceProvider _serviceProvider;
     private readonly Dictionary<string, ViewRegistration> _viewRegistrations = new ();
-    private readonly Dictionary<string, object> _singletonCache = new ();
+    private readonly Dictionary<string, object> _singletonCache = new (); 
 
     public LazyRegionManager(IServiceProvider serviceProvider,
                              LazyViewRegistry registry)
@@ -42,13 +43,6 @@ public class LazyRegionManager : ILazyRegionManager
             Lifetime = lifetime,
             Factory = CreateFactory<T> ()
         };
-    }
-
-    // Region 등록 시 호출
-    public void RegisterRegion(string regionName, ILazyRegion region)
-    {
-        // Static Registry에 위임
-        LazyRegionRegistry.RegisterRegion (regionName, region);
     }
 
     public async Task NavigateAsync(string regionName, string viewKey, TimeSpan? timeout = null)
