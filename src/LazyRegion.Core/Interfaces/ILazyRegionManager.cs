@@ -15,19 +15,17 @@ public interface ILazyRegionManager
         where T : class, new();
 }
 
-public class LazyRegionService : ILazyRegionManager
+public class LazyRegionManager : ILazyRegionManager
 {
     private readonly ConcurrentDictionary<string, TaskCompletionSource<ILazyRegion>> _regionWaiters = new ();
     private readonly IServiceProvider _serviceProvider;
     private readonly Dictionary<string, ViewRegistration> _viewRegistrations = new ();
     private readonly Dictionary<string, object> _singletonCache = new ();
-    private readonly Dictionary<string, ILazyRegion> _regions = new ();
 
-    public LazyRegionService(IServiceProvider serviceProvider,
+    public LazyRegionManager(IServiceProvider serviceProvider,
                              LazyViewRegistry registry)
     {
         _serviceProvider = serviceProvider;
-        LazyRegionManager.Initialize (this);
 
         var actions =_serviceProvider.GetServices<IStartupAction> ();
         foreach (var action in actions)
@@ -46,55 +44,30 @@ public class LazyRegionService : ILazyRegionManager
         };
     }
 
-    private async Task<ILazyRegion> GetRegionAsync(string regionName, TimeSpan? regionWaitTimeout = null)
-    {
-        if (_regions.TryGetValue (regionName, out var region))
-            return region;
-
-        // Region이 등록될 때까지 대기
-        var tcs = _regionWaiters.GetOrAdd (regionName, _ => new TaskCompletionSource<ILazyRegion> ());
-
-        var actualTimeout = regionWaitTimeout ?? TimeSpan.FromSeconds (30); // 기본 30초
-
-        var timeoutTask = Task.Delay (actualTimeout);
-        var completedTask = await Task.WhenAny (tcs.Task, timeoutTask);
-
-        if (completedTask == timeoutTask)
-        {
-            throw new TimeoutException ($"등록되지 않은 Region : {regionName} 입니다.");
-        }
-        return await tcs.Task;
-    }
-
     // Region 등록 시 호출
     public void RegisterRegion(string regionName, ILazyRegion region)
     {
-        _regions[regionName] = region;
-
-        // 대기 중인 Task들에게 알림
-        if (_regionWaiters.TryRemove (regionName, out var tcs))
-        {
-            tcs.SetResult (region);
-        }
+        // Static Registry에 위임
+        LazyRegionRegistry.RegisterRegion (regionName, region);
     }
 
     public async Task NavigateAsync(string regionName, string viewKey, TimeSpan? timeout = null)
     {
-        var region = await GetRegionAsync (regionName);
-
-        region.Set(await GetOrCreateView (viewKey));
+        var region = await LazyRegionRegistry.WaitForRegionAsync (regionName, timeout);
+        var view = await GetOrCreateView (viewKey);
+        region.Set (view);
     }
 
     public async Task NavigateAsync<T>(string regionName, string viewKey, TimeSpan? timeout = null)
     {
-        var region = await GetRegionAsync (regionName);
+        var region = await LazyRegionRegistry.WaitForRegionAsync (regionName, timeout);
 
-        var vm = this._serviceProvider.GetService<T> ();
-        if(vm == null)
-            throw new InvalidOperationException ($"ViewModel Not found");
+        var vm = _serviceProvider.GetService<T> ();
+        if (vm == null)
+            throw new InvalidOperationException ($"ViewModel Not found: {typeof (T).Name}");
 
-        var viewType = await GetOrCreateView (viewKey);
-        region.Set (viewType, vm);
+        var view = await GetOrCreateView (viewKey);
+        region.Set (view, vm);
     }
 
     private async Task<object> GetOrCreateView(string viewKey)

@@ -94,7 +94,7 @@ public class LazyRegion : ContentControl, ILazyRegion
     {
         if (d is LazyRegion region && !string.IsNullOrEmpty (region.RegionName))
         {
-            LazyRegionManager.Service.RegisterRegion (region.RegionName, region);
+            LazyRegionRegistry.RegisterRegion (region.RegionName, region);
         }
     }
 
