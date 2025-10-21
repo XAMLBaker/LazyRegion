@@ -48,9 +48,11 @@ public class LazyRegionManager : ILazyRegionManager
     {
         var region = await LazyRegionRegistry.WaitForRegionAsync (regionName, regionWaitTimeout);
         var view = await GetOrCreateView (viewKey);
+
         region.Set (view);
 
         LazyRegionRegistry.NotifyNavigationCompleted (regionName, viewKey);
+        RegionMap.Register (regionName, view);
     }
     public async Task NavigateAsync<T>(string regionName, string viewKey, TimeSpan? regionWaitTimeout = null)
     {
@@ -64,6 +66,7 @@ public class LazyRegionManager : ILazyRegionManager
         region.Set (view, vm);
 
         LazyRegionRegistry.NotifyNavigationCompleted (regionName, viewKey);
+        RegionMap.Register (regionName, view);
     }
 
     private async Task<object> GetOrCreateView(string viewKey)

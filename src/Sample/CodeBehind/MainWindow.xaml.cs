@@ -1,4 +1,5 @@
-﻿using SampleScreen.Base;
+﻿using LazyRegion.Core;
+using SampleScreen.Base;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -36,7 +37,11 @@ namespace CodeBehind
 
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-
+            RadioButton rb = (RadioButton)sender;
+            if (rb.IsChecked == false)
+                return;
+            TransitionAnimation MyStatus = (TransitionAnimation)Enum.Parse (typeof (TransitionAnimation), rb.Content.ToString (), true);
+            region.TransitionAnimation = MyStatus;
         }
         private void Run()
         {

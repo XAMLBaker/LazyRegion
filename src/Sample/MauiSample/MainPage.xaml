@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MauiSample.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:lz="clr-namespace:LazyRegion.Maui;assembly=LazyRegion.Maui">
+    <Grid ColumnDefinitions="*, 200">
+        <lz:LazyRegion x:Name="region" RegionName="Root" />
+        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+            <Picker x:Name="piu" SelectedIndexChanged="Picker_SelectedIndexChanged">
+                <Picker.Items>
+                    <x:String>NONE</x:String>
+                    <x:String>Fade</x:String>
+                    <x:String>NewFromLeft</x:String>
+                    <x:String>NewFromRight</x:String>
+                    <x:String>NewFromUp</x:String>
+                    <x:String>NewFromDown</x:String>
+                    <x:String>SlideLeft</x:String>
+                    <x:String>SlideRight</x:String>
+                    <x:String>SlideUp</x:String>
+                    <x:String>SlideDown</x:String>
+                    <x:String>Scale</x:String>
+                    <x:String>ZoomIn</x:String>
+                    <x:String>ZoomOut</x:String>
+                </Picker.Items>
+            </Picker>
+            <Button Clicked="Button_Clicked" Text="적용!!!!!!!!" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
