@@ -21,13 +21,11 @@ public class LazyRegionManager : ILazyRegionManager
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly Dictionary<string, ViewRegistration> _viewRegistrations = new ();
-    private readonly Dictionary<string, object> _singletonCache = new (); 
-
+    private readonly Dictionary<string, object> _singletonCache = new ();
     public LazyRegionManager(IServiceProvider serviceProvider,
                              LazyViewRegistry registry)
     {
         _serviceProvider = serviceProvider;
-
         var actions =_serviceProvider.GetServices<IStartupAction> ();
         foreach (var action in actions)
             action.Execute ();
@@ -49,7 +47,9 @@ public class LazyRegionManager : ILazyRegionManager
     {
         var region = await LazyRegionRegistry.WaitForRegionAsync (regionName, timeout);
         var view = await GetOrCreateView (viewKey);
+
         region.Set (view);
+        RegionMap.Register (regionName, view);
     }
 
     public async Task NavigateAsync<T>(string regionName, string viewKey, TimeSpan? timeout = null)
@@ -62,6 +62,7 @@ public class LazyRegionManager : ILazyRegionManager
 
         var view = await GetOrCreateView (viewKey);
         region.Set (view, vm);
+        RegionMap.Register (regionName, view);
     }
 
     private async Task<object> GetOrCreateView(string viewKey)
