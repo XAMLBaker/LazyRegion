@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using LazyRegion.Core;
+using LazyRegion.Maui;
 using MauiSample.Views;
 namespace MauiSample
 {
@@ -10,6 +11,15 @@ namespace MauiSample
             var builder = MauiApp.CreateBuilder ();
             builder
                 .UseMauiApp<App> ()
+                .UseLazyRegion (region =>
+                {
+                    region.AddLazyView<ScreenA> ("A")
+                          .AddLazyView<ScreenB> ("B")
+                          .ConfigureInitialNavigation (configure =>
+                          {
+                              configure.NavigateAsync ("Root", "A");
+                          });
+                })                    
                 .ConfigureFonts (fonts =>
                 {
                     fonts.AddFont ("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -19,13 +29,6 @@ namespace MauiSample
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
-            builder.Services.UseLazyRegion ()
-                            .AddLazyView<ScreenA> ("A")
-                            .AddLazyView<ScreenB> ("B")
-                            .ConfigureInitialNavigation (configure =>
-                            {
-                                configure.NavigateAsync ("Root", "A");
-                            });
             return builder.Build ();
         }
     }
