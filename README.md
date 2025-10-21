@@ -1,8 +1,10 @@
 # LazyRegion  
-
-[![NuGet](https://img.shields.io/nuget/v/LazyRegion.WPF.svg)](https://www.nuget.org/packages/LazyRegion.WPF/)  
+**WPF**
+[![NuGet](https://img.shields.io/nuget/v/LazyRegion.WPF.svg)](https://www.nuget.org/packages/LazyRegion.WPF/) 
 [![NuGet Downloads](https://img.shields.io/nuget/dt/LazyRegion.WPF.svg)](https://www.nuget.org/packages/LazyRegion.WPF/)
-[![NuGet](https://img.shields.io/nuget/v/LazyRegion.MAUI.svg)](https://www.nuget.org/packages/LazyRegion.MAUI/)  
+
+**MAUI**
+[![NuGet](https://img.shields.io/nuget/v/LazyRegion.MAUI.svg)](https://www.nuget.org/packages/LazyRegion.MAUI/) 
 [![NuGet Downloads](https://img.shields.io/nuget/dt/LazyRegion.MAUI.svg)](https://www.nuget.org/packages/LazyRegion.MAUI/)
 
 **LazyRegion**은 부드러운 전환 애니메이션과 MVVM 구조를 지원하는 화면 전환용 Region 라이브러리입니다.  
@@ -69,6 +71,7 @@ RegionManager.RequestNavigate("MainRegion", new HomeView());
 ```
 RegionManager를 통해 지정된 Region의 View를 손쉽게 교체할 수 있습니다.
 
+# 확장 기능
 ### 🔹 초기 네비게이션 구성 (ConfigureInitialNavigation)
 앱 시작 시 자동으로 특정 Region으로 이동할 수 있습니다.
 
@@ -81,13 +84,13 @@ RegionManager를 통해 지정된 Region의 View를 손쉽게 교체할 수 있�
                 config.NavigateAsync("Root", "a"); // 앱 시작 시 Root Region → ScreenA
         });
 ```
-###🔹 RegionTimeout
+### 🔹 RegionTimeout
 Region 등록이 지연될 경우, 지정된 시간 내 등록되지 않으면 자동 취소됩니다.
 
 ```csharp
 regionManager.NavigateAsync("Root", "a", TimeSpan.FromSeconds(30));
 ```
-###🔹 RegionState
+### 🔹 RegionState
 Region 단위로 Loading / Error 상태를 자동 관리합니다.
 ```
         .UseLazyRegion ()
