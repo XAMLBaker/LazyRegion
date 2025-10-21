@@ -13,6 +13,7 @@
     <Authors>lukewire</Authors>
     <Description>Content &lt;-&gt; Content 간의 애니메이션 처리 LazyRegion 컨트롤</Description>
     <PackageTags>LazyRegion;Animation;WPF;Control</PackageTags>
+    <PackageProjectUrl>https://github.com/XAMLBaker/LazyRegion</PackageProjectUrl>
 
     <!-- XML 문서 포함 -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
