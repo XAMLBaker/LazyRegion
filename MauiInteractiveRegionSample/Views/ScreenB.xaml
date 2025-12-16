@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    x:Class="MauiInteractiveRegionSample.Views.ScreenB"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    <Border
+        Margin="50"
+        Padding="10"
+        Background="#4a4a50"
+        StrokeShape="RoundRectangle 10">
+        <Label
+            FontSize="28"
+            HorizontalOptions="Start"
+            Text="Screen B"
+            TextColor="White"
+            VerticalOptions="Start" />
+    </Border>
+</ContentView>
