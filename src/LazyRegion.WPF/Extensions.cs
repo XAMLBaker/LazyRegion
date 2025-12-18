@@ -6,9 +6,9 @@ namespace LazyRegion.WPF;
 
 public static class Extensions
 {
-    public static IServiceCollection UseWPFLazyRegion(this IServiceCollection services)
+    public static IServiceCollection UseLazyRegion(this IServiceCollection services)
     {
-        services.UseLazyRegion ();
+        services.UseLazyRegionCore ();
         LazyRegionRegistry.NavigateHandler = async (mgr, regionName, viewKey) =>
         {
             await Application.Current.Dispatcher.InvokeAsync (async () =>

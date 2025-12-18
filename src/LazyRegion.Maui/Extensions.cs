@@ -7,8 +7,9 @@ public static class Extensions
     public static MauiAppBuilder UseLazyRegion(this MauiAppBuilder builder,
                                                Action<IServiceCollection>? configure = null)
     {
-        var configurator = builder.Services.UseLazyRegion ();
+        var configurator = builder.Services.UseLazyRegionCore ();
         configure (builder.Services);
+
         return builder;
     }
 }

@@ -41,7 +41,7 @@ namespace LazyRegion.Core
             return services;
         }
 
-        public static IServiceCollection UseLazyRegion(
+        public static IServiceCollection UseLazyRegionCore(
             this IServiceCollection services)
         {
             services.AddSingleton (sp =>

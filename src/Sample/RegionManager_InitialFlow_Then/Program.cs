@@ -7,8 +7,7 @@ using RegionManager_InitialFlow_Then.Views;
 
 var builder = Host.CreateApplicationBuilder ();
 builder.Services.AddSingleton<MainViewModel> ();
-
-builder.Services.UseWPFLazyRegion ()
+builder.Services.UseLazyRegion ()
                 .AddLazyView<SplashView>("Splash")
                 .AddLazyView<LoginView> ("Login")
                 .AddLazyView<MainView> ("Main")
