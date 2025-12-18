@@ -1,10 +1,10 @@
 ﻿using LazyRegion.Core;
 using Microsoft.Extensions.DependencyInjection;
-using RegionManager_ConfigureInitalNavigation.ViewModels;
+using RegionManager_InitialFlow.ViewModels;
 using SampleScreen.Base;
 using System.Windows;
 
-namespace RegionManager_ConfigureInitalNavigation
+namespace RegionManager_InitialFlow
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -19,9 +19,13 @@ namespace RegionManager_ConfigureInitalNavigation
             serviceCollection.UseLazyRegion ()
                              .AddLazyView<ScreenA> ("a")
                              .AddLazyView<ScreenB> ("b")
-                             .ConfigureInitialNavigation (configure =>
+                             .ConfigureRegions (configure =>
                              {
-                                 configure.NavigateAsync ("Root", "a");
+                                 configure.ForRegion ("Root")
+                                          .WithInitialFlow (flow =>
+                                          {
+                                              flow.Show ("a");
+                                          });
                              });
 
             serviceCollection.AddSingleton<MainViewModel> ();

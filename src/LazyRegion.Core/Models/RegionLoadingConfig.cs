@@ -8,4 +8,6 @@ public class RegionLoadingConfig
     public string? ErrorViewKey { get; set; }
     public TimeSpan MinDisplayTime { get; set; } = TimeSpan.Zero;
     public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds (30);
+
+    public InitialRegionFlow? InitialFlow { get; set; }
 }

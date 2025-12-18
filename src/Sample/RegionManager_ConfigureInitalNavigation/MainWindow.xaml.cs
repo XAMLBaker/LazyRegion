@@ -1,7 +1,7 @@
-﻿using RegionManager_ConfigureInitalNavigation.ViewModels;
+﻿using RegionManager_InitialFlow.ViewModels;
 using System.Windows;
 
-namespace RegionManager_ConfigureInitalNavigation
+namespace RegionManager_InitialFlow
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

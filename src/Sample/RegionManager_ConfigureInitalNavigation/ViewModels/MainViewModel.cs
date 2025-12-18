@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using LazyRegion.Core;
 
-namespace RegionManager_ConfigureInitalNavigation.ViewModels;
+namespace RegionManager_InitialFlow.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
