@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace LazyRegion.Core;
 
@@ -13,13 +14,13 @@ public interface IInitialFlowBuilder
 
     IInitialFlowBuilder Then(string viewKey);
 
-    IInitialFlowBuilder Then(string viewKey, Func<bool> when);
+    IInitialFlowBuilder Then(string viewKey, Func<Task<bool>> when);
 
     IInitialFlowBuilder Then(
         string viewKey,
-        Func<IServiceProvider, bool> when);
+         Func<IServiceProvider, Task<bool>>? when = null);
 
     IInitialFlowBuilder Then<TService>(
         string viewKey,
-        Func<TService, bool> when);
+         Func<TService, Task<bool>> when);
 }

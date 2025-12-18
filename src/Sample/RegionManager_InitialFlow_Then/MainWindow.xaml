@@ -10,6 +10,7 @@
     Title="MainWindow"
     Width="800"
     Height="450"
+    voom:ViewModelLocator.AutoWireViewModel="True"
     mc:Ignorable="d">
     <wpf:LazyRegion RegionName="Root" />
 </Window>

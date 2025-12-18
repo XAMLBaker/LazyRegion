@@ -11,13 +11,12 @@ namespace LazyRegion.Core
         private static readonly Dictionary<string, ILazyRegion> _regions = new ();
         private static readonly Dictionary<string, TaskCompletionSource<ILazyRegion>> _waiters = new ();
         private static readonly Dictionary<string, LoadingRegionBehavior> _behaviors = new ();
-        private static readonly Dictionary<string, ILazyRegion> _pendingRegions = new ();
 
         private static RegionLoadingOptions? _options;
         private static ILazyRegionManagerBase? _manager;
 
         private static readonly HashSet<string> _initialFlowExecuted = new ();
-
+        public static Func<ILazyRegionManager, string, string, Task>? NavigateHandler;
         // 기존 API 유지
         public static void SetLoadingConfigs(
             Dictionary<string, RegionLoadingConfig> configs,
@@ -37,24 +36,10 @@ namespace LazyRegion.Core
         {
             _options = options;
             _manager = manager;
-
-            // 🔥 이미 생성된 Region이 있다면 즉시 소비
-            foreach (var kv in _pendingRegions)
-            {
-                RegisterRegion (kv.Key, kv.Value);
-            }
-
-            _pendingRegions.Clear ();
         }
 
         public static void RegisterRegion(string name, ILazyRegion region)
         {
-            if (_manager == null)
-            { 
-                // Manager가 아직 없으면 예약
-                _pendingRegions[name] = region;
-            }
-
             _regions[name] = region;
 
             if (_options?.TryGet (name, out var cfg) == true &&
@@ -82,26 +67,54 @@ namespace LazyRegion.Core
             }
         }
         private static async Task RunInitialFlowAsync(
-        string regionName,
-        InitialRegionFlow flow)
+            string regionName,
+            InitialRegionFlow flow)
         {
+            if (_manager is not LazyRegionManager mgr)
+                return;
+            if(flow.InitialViewKey != null)
+            {
+                await _manager.NavigateAsync (regionName, flow.InitialViewKey);
+                // ⭐ UI가 한 번 렌더링될 기회를 줌
+                await Task.Yield ();
+            }
+
+            // 2️⃣ Step 순회
             foreach (var step in flow.Steps)
             {
-                if (step.Condition != null &&
-                    !Evaluate (step.Condition))
-                    continue;
+                if (step.Condition != null)
+                {
+                    bool ok;
 
-                await _manager!.NavigateAsync (regionName, step.ViewKey);
-                break; // ⭐ 최초 만족 조건만 실행
+                    try
+                    {
+                        ok = await step.Condition (mgr.ServiceProvider); // Task<bool> await
+                    }
+                    catch
+                    {
+                        // Condition에서 예외 발생 시 스킵
+                        continue;
+                    }
+
+                    if (!ok)
+                        continue;
+                }
+
+                // ⭐ Step Navigate는 안전하게 래퍼 사용
+                await NavigateStepAsync (regionName, step.ViewKey);
+                break; // 최초 만족 조건만 실행
             }
         }
-        private static bool Evaluate(Func<IServiceProvider, bool> cond)
+        // Step Navigate 전용 래퍼
+        private static async Task NavigateStepAsync(string regionName, string viewKey)
         {
-            // LazyRegionManager에 ServiceProvider 노출 필요
-            if (_manager is LazyRegionManager mgr)
-                return cond (mgr.ServiceProvider);
+            if (_manager is not LazyRegionManager mgr)
+                return;
 
-            return false;
+            // Step Navigate 전용 UI 안전 호출
+            await Task.Yield ();                // Dispatcher에 제어권 반환
+
+            await NavigateHandler?.Invoke(mgr, regionName, viewKey);
         }
 
         public static async Task<ILazyRegion> WaitForRegionAsync(
@@ -130,18 +143,6 @@ namespace LazyRegion.Core
         {
             if (_behaviors.TryGetValue (region, out var b))
                 b.OnNavigationCompleted (viewKey);
-        }
-
-        public static void UnregisterRegion(string name)
-        {
-            if (_manager != null)
-            {
-                //_manager.UnregisterRegion (name);
-            }
-            else
-            {
-                _pendingRegions.Remove (name);
-            }
         }
     }
 

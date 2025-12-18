@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LazyRegion.Core;
 
 public sealed class InitialRegionFlow
 {
+    public string? InitialViewKey { get; set; }
     internal readonly List<FlowStep> Steps = new ();
 }
 
 public sealed class FlowStep
 {
     public string ViewKey { get; }
-    public Func<IServiceProvider, bool>? Condition { get; }
+    public Func<IServiceProvider, Task<bool>>? Condition { get; }
 
     public FlowStep(string viewKey,
-                    Func<IServiceProvider, bool>? condition = null)
+                    Func<IServiceProvider, Task<bool>>? condition = null)
     {
         ViewKey = viewKey;
         Condition = condition;

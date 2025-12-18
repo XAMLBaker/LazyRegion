@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Threading.Tasks;
 
 namespace LazyRegion.Core;
 
@@ -14,25 +15,32 @@ internal sealed class InitialFlowBuilder : IInitialFlowBuilder
 
     public IInitialFlowBuilder Show(string viewKey)
     {
-        _flow.Steps.Add (new FlowStep (viewKey));
+        _flow.InitialViewKey = viewKey;
         return this;
     }
 
     public IInitialFlowBuilder Then(string viewKey)
-        => Show (viewKey);
+    {
+        _flow.Steps.Add (new FlowStep (viewKey, null));
+        return this;
+    }
 
     // ✅ Static 조건
-    public IInitialFlowBuilder Then(string viewKey, Func<bool> when)
+    public IInitialFlowBuilder Then(string viewKey,
+        Func<Task<bool>> when)
     {
         _flow.Steps.Add (
-            new FlowStep (viewKey, _ => when ()));
+          new FlowStep (
+              viewKey,
+              _ => when ()
+          ));
         return this;
     }
 
     // ✅ IServiceProvider 직접
     public IInitialFlowBuilder Then(
         string viewKey,
-        Func<IServiceProvider, bool> when)
+        Func<IServiceProvider, Task<bool>>? when = null)
     {
         _flow.Steps.Add (new FlowStep (viewKey, when));
         return this;
@@ -41,16 +49,17 @@ internal sealed class InitialFlowBuilder : IInitialFlowBuilder
     // ✅ DI 기반 (권장)
     public IInitialFlowBuilder Then<TService>(
         string viewKey,
-        Func<TService, bool> when)
+            Func<TService, Task<bool>> when)
     {
         _flow.Steps.Add (
             new FlowStep (
                 viewKey,
-                sp =>
+                async sp =>
                 {
                     var svc = sp.GetRequiredService<TService> ();
-                    return when (svc);
-                }));
+                    return await when (svc);
+                }
+            ));
         return this;
     }
 }

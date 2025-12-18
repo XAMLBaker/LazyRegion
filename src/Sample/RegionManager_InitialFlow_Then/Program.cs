@@ -1,4 +1,5 @@
-﻿using LazyRegion.Core;
+﻿using LazyRegion.WPF;
+using LazyRegion.Core;
 using LazyVoom.Core;
 using RegionManager_InitialFlow_Then;
 using RegionManager_InitialFlow_Then.ViewModels;
@@ -7,7 +8,7 @@ using RegionManager_InitialFlow_Then.Views;
 var builder = Host.CreateApplicationBuilder ();
 builder.Services.AddSingleton<MainViewModel> ();
 
-builder.Services.UseLazyRegion ()
+builder.Services.UseWPFLazyRegion ()
                 .AddLazyView<SplashView>("Splash")
                 .AddLazyView<LoginView> ("Login")
                 .AddLazyView<MainView> ("Main")
@@ -16,19 +17,25 @@ builder.Services.UseLazyRegion ()
                     configure.ForRegion ("Root")
                              .WithInitialFlow (flow =>
                              {
-                                 flow.Show ("Splash");
-                                     //.Then ("Main", () => 
-                                     //{
-                                     //    return true;
-                                     //})
-                                     //.Then ("Login");
+                                 flow.Show ("Splash")
+                                     .Then ("Main", async() =>
+                                     {
+                                         await Task.Delay (5000);
+                                         return false;
+                                     })
+                                     .Then ("Login");
                              });
                 });
 var app = builder.BuildApp<App, MainWindow> ();  // 🔥
 
 app.OnStartUpAsync = async provider =>
 {
-    Voom.Instance.WithMapping<MainWindow, MainViewModel> ();
+    Voom.Instance
+        .WithContainerResolver (type =>
+        {
+            return provider.GetService (type);
+        })
+        .WithMapping<MainWindow, MainViewModel> ();
 };
 // Exit 시 정리
 app.OnExitAsync = async provider =>
