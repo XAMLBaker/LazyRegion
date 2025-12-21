@@ -4,6 +4,20 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1;net48;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
     <LangVersion>12</LangVersion>
     <Nullable>enable</Nullable>
+  
+    <!-- NuGet 패키지 정보 -->
+    <PackageId>LazyRegion</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>lukewire</Authors>
+    <Description>Content &lt;-&gt; Content 간의 애니메이션 처리 LazyRegion 컨트롤</Description>
+    <PackageTags>LazyRegion;Animation;WPF;Control</PackageTags>
+    <PackageProjectUrl>https://github.com/XAMLBaker/LazyRegion</PackageProjectUrl>
+
+    <!-- XML 문서 포함 -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- 심볼 패키지 포함 -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   
   <ItemGroup>
