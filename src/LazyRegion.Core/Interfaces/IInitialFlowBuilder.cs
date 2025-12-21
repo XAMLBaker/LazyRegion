@@ -1,26 +1,22 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Text;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace LazyRegion.Core;
-
-public interface IInitialFlowBuilder
+namespace LazyRegion.Core
 {
-    IInitialFlowBuilder Show(string viewKey);
+    public interface IInitialFlowBuilder
+    {
+        IInitialFlowBuilder Show(string viewKey);
 
-    IInitialFlowBuilder Then(string viewKey);
+        IInitialFlowBuilder Then(string viewKey);
 
-    IInitialFlowBuilder Then(string viewKey, Func<Task<bool>> when);
+        IInitialFlowBuilder Then(string viewKey, Func<Task<bool>> when);
 
-    IInitialFlowBuilder Then(
-        string viewKey,
-         Func<IServiceProvider, Task<bool>>? when = null);
+        IInitialFlowBuilder Then(
+            string viewKey,
+             Func<IServiceProvider, Task<bool>>? when = null);
 
-    IInitialFlowBuilder Then<TService>(
-        string viewKey,
-         Func<TService, Task<bool>> when);
+        IInitialFlowBuilder Then<TService>(
+            string viewKey,
+             Func<TService, Task<bool>> when);
+    }
 }

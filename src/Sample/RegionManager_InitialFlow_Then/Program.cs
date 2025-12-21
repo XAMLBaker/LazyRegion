@@ -1,12 +1,13 @@
 ﻿using LazyRegion.WPF;
 using LazyRegion.Core;
-using LazyVoom.Core;
 using RegionManager_InitialFlow_Then;
 using RegionManager_InitialFlow_Then.ViewModels;
 using RegionManager_InitialFlow_Then.Views;
+using LazyVoom.Core;
 
 var builder = Host.CreateApplicationBuilder ();
 builder.Services.AddSingleton<MainViewModel> ();
+
 builder.Services.UseLazyRegion ()
                 .AddLazyView<SplashView>("Splash")
                 .AddLazyView<LoginView> ("Login")
@@ -25,6 +26,9 @@ builder.Services.UseLazyRegion ()
                                      .Then ("Login");
                              });
                 });
+
+
+
 var app = builder.BuildApp<App, MainWindow> ();  // 🔥
 
 app.OnStartUpAsync = async provider =>

@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MauiSample", "src\Sample\Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegionManager_InitialFlow_Then", "src\Sample\RegionManager_InitialFlow_Then\RegionManager_InitialFlow_Then.csproj", "{BF386735-BD58-4D24-B342-066E323E836D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegionManager_New", "src\Sample\RegionManager_New\RegionManager_New.csproj", "{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,6 +86,10 @@ Global
 		{BF386735-BD58-4D24-B342-066E323E836D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF386735-BD58-4D24-B342-066E323E836D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF386735-BD58-4D24-B342-066E323E836D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -98,6 +104,7 @@ Global
 		{CD911EB8-9D7F-48F0-9E37-592640076EA8} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 		{B8BFCE90-E736-4553-BFF5-688EE06B053C} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 		{BF386735-BD58-4D24-B342-066E323E836D} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
+		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96F9E939-F1E3-409C-BF26-593CAC1AEE7C}

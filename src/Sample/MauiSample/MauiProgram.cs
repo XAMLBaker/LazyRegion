@@ -11,15 +11,20 @@ namespace MauiSample
             var builder = MauiApp.CreateBuilder ();
             builder
                 .UseMauiApp<App> ()
-                .UseLazyRegion (region =>
+                .UseLazyRegion (lazy =>
                 {
-                    region.AddLazyView<ScreenA> ("A")
-                          .AddLazyView<ScreenB> ("B")
-                          .ConfigureInitialNavigation (configure =>
+                    lazy.Register<ScreenA> ("A");
+                    lazy.Register<ScreenB> ("B");
+
+                    lazy.ConfigureRegions (config =>
                           {
-                              configure.NavigateAsync ("Root", "A");
+                              config.ForRegion ("Root")
+                                    .WithInitialFlow (flow =>
+                                    {
+                                        flow.Show ("A");
+                                    });
                           });
-                })                    
+                })
                 .ConfigureFonts (fonts =>
                 {
                     fonts.AddFont ("OpenSans-Regular.ttf", "OpenSansRegular");

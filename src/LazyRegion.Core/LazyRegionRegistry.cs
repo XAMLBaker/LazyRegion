@@ -114,7 +114,16 @@ namespace LazyRegion.Core
             // Step Navigate 전용 UI 안전 호출
             await Task.Yield ();                // Dispatcher에 제어권 반환
 
-            await NavigateHandler?.Invoke(mgr, regionName, viewKey);
+            if (NavigateHandler != null)
+            {
+                // UI 환경: Handler 사용 (WPF/Maui/Avalonia에서 설정됨)
+                await NavigateHandler.Invoke (mgr, regionName, viewKey);
+            }
+            else
+            {
+                // 유닛테스트: Handler 없으면 직접 실행
+                await mgr.NavigateAsync (regionName, viewKey);
+            }
         }
 
         public static async Task<ILazyRegion> WaitForRegionAsync(

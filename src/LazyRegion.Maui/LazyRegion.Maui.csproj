@@ -13,7 +13,7 @@
 
     <!-- NuGet 패키지 정보 -->
     <PackageId>LazyRegion.MAUI</PackageId>
-    <Version>1.0.0</Version>
+    <Version>2.0.0</Version>
     <Authors>lukewire</Authors>
     <Description>Content &lt;-&gt; Content 간의 애니메이션 처리 LazyRegion 컨트롤 for .NET MAUI</Description>
     <PackageTags>LazyRegion;Animation;MAUI;Control;Xamarin</PackageTags>

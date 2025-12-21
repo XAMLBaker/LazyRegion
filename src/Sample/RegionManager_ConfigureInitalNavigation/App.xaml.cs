@@ -1,4 +1,5 @@
-﻿using LazyRegion.Core;
+﻿using LazyRegion.WPF;
+using LazyRegion.Core;
 using Microsoft.Extensions.DependencyInjection;
 using RegionManager_InitialFlow.ViewModels;
 using SampleScreen.Base;

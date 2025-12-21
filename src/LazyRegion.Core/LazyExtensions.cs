@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace LazyRegion.Core
 {
@@ -62,5 +61,4 @@ namespace LazyRegion.Core
             return services;
         }
     }
-
 }
