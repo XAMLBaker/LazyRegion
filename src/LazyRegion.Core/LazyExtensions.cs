@@ -12,7 +12,7 @@ namespace LazyRegion.Core
         public static IServiceCollection AddLazyView<T>(
             this IServiceCollection services,
             string key,
-            ServiceLifetime lifetime = ServiceLifetime.Singleton)
+            ServiceLifetime lifetime = ServiceLifetime.Transient)
             where T : class, new()
         {
             services.Add (new ServiceDescriptor (typeof (T), typeof (T), lifetime));
