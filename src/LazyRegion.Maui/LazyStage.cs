@@ -2,20 +2,30 @@
 using Microsoft.Maui.Controls.Shapes;
 
 namespace LazyRegion.Maui;
-public class LazyRegion : ContentView, ILazyRegion
+
+/// <summary>
+/// (KO) LazyRegion의 새로운 이름입니다. 무대(Stage) 기반의 세련된 전환을 제공합니다.
+/// (EN) The new identity of LazyRegion. Provides sophisticated stage-based transitions.
+/// </summary>
+[Obsolete ("LazyRegion is now LazyStage. Please migrate to LazyStage for the new world.")]
+public class LazyRegion : LazyStage
+{
+}
+
+public class LazyStage : ContentView, ILazyRegion
 {
     public static readonly BindableProperty RegionNameProperty =
-        BindableProperty.Create (nameof (RegionName), typeof (string), typeof (LazyRegion), default (string), propertyChanged: OnRegionNameChanged);
+        BindableProperty.Create (nameof (RegionName), typeof (string), typeof (LazyStage), default (string), propertyChanged: OnRegionNameChanged);
 
     public static readonly BindableProperty TransitionAnimationProperty =
-        BindableProperty.Create (nameof (TransitionAnimation), typeof (TransitionAnimation), typeof (LazyRegion), TransitionAnimation.Fade);
+        BindableProperty.Create (nameof (TransitionAnimation), typeof (TransitionAnimation), typeof (LazyStage), TransitionAnimation.Fade);
 
     public static readonly BindableProperty TransitionDurationProperty =
-        BindableProperty.Create (nameof (TransitionDuration), typeof (TimeSpan), typeof (LazyRegion), TimeSpan.FromMilliseconds (300));
+        BindableProperty.Create (nameof (TransitionDuration), typeof (TimeSpan), typeof (LazyStage), TimeSpan.FromMilliseconds (300));
 
     // The property that consumers set to change displayed content in the region.
     public static readonly BindableProperty RegionContentProperty =
-        BindableProperty.Create (nameof (RegionContent), typeof (object), typeof (LazyRegion), default (object), propertyChanged: OnRegionContentChanged);
+        BindableProperty.Create (nameof (RegionContent), typeof (object), typeof (LazyStage), default (object), propertyChanged: OnRegionContentChanged);
 
     public string RegionName
     {
@@ -46,7 +56,7 @@ public class LazyRegion : ContentView, ILazyRegion
     private ContentView _stagingPresenter;
     private bool _isNavigating;
 
-    public LazyRegion()
+    public LazyStage()
     {
         // Build lightweight visual tree: Grid with two ContentViews stacked.
         var root = new Grid ();
@@ -87,7 +97,7 @@ public class LazyRegion : ContentView, ILazyRegion
 
     private static void OnRegionNameChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        if (bindable is LazyRegion region && !string.IsNullOrEmpty (region.RegionName))
+        if (bindable is LazyStage region && !string.IsNullOrEmpty (region.RegionName))
         {
             LazyRegionRegistry.RegisterRegion (region.RegionName, region);
         }
@@ -95,7 +105,7 @@ public class LazyRegion : ContentView, ILazyRegion
 
     private static void OnRegionContentChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        if (bindable is LazyRegion region)
+        if (bindable is LazyStage region)
         {
             region.HandleRegionContentChanged (oldValue, newValue);
         }

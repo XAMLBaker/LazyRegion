@@ -8,7 +8,7 @@ namespace LazyRegion.Core
     {
         private readonly SynchronizationContext? _uiContext;
         private readonly string _regionName;
-        private readonly ILazyRegion _region;
+        private readonly ILazyRegionBase _region;
         private readonly RegionLoadingConfig _config;
         private readonly ILazyRegionManagerBase _regionManager;
         private readonly DateTime _regionCreatedTime;
@@ -16,7 +16,7 @@ namespace LazyRegion.Core
 
         public LoadingRegionBehavior(
             string regionName,
-            ILazyRegion region,
+            ILazyRegionBase region,
             RegionLoadingConfig config,
             ILazyRegionManagerBase regionManager)
         {

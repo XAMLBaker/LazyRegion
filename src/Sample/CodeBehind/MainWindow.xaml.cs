@@ -1,15 +1,7 @@
 ﻿using LazyRegion.Core;
 using SampleScreen.Base;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace CodeBehind
 {
@@ -41,12 +33,11 @@ namespace CodeBehind
             if (rb.IsChecked == false)
                 return;
             TransitionAnimation MyStatus = (TransitionAnimation)Enum.Parse (typeof (TransitionAnimation), rb.Content.ToString (), true);
-            region.TransitionAnimation = MyStatus;
+            stage.TransitionAnimation = MyStatus;
         }
         private void Run()
         {
-            this.region.Content = views[idx++];
+            this.stage.Content = views[idx++];
         }
-
     }
 }

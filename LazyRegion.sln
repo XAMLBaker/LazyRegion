@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36429.23
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11415.281 d18.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.Core", "src\LazyRegion.Core\LazyRegion.Core.csproj", "{B0BEA3AE-E42A-4832-A0AA-5E4DA761F45A}"
 EndProject
@@ -30,6 +30,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegionManager_InitialFlow_Then", "src\Sample\RegionManager_InitialFlow_Then\RegionManager_InitialFlow_Then.csproj", "{BF386735-BD58-4D24-B342-066E323E836D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegionManager_New", "src\Sample\RegionManager_New\RegionManager_New.csproj", "{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegionItemsControlSample", "src\Sample\LazyRegionItemsControlSample\LazyRegionItemsControlSample.csproj", "{A33804E4-5C77-43C2-B80E-F1396B184991}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,6 +92,10 @@ Global
 		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A33804E4-5C77-43C2-B80E-F1396B184991}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A33804E4-5C77-43C2-B80E-F1396B184991}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A33804E4-5C77-43C2-B80E-F1396B184991}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A33804E4-5C77-43C2-B80E-F1396B184991}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +111,7 @@ Global
 		{B8BFCE90-E736-4553-BFF5-688EE06B053C} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 		{BF386735-BD58-4D24-B342-066E323E836D} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
+		{A33804E4-5C77-43C2-B80E-F1396B184991} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96F9E939-F1E3-409C-BF26-593CAC1AEE7C}

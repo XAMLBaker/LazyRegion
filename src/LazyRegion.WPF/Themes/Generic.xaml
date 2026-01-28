@@ -3,10 +3,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:LazyRegion.WPF">
 
-    <Style TargetType="{x:Type local:LazyRegion}">
+    <Style TargetType="{x:Type local:LazyStage}">
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="{x:Type local:LazyRegion}">
+                <ControlTemplate TargetType="{x:Type local:LazyStage}">
                     <Grid x:Name="PART_RootGrid" ClipToBounds="True">
                         <ContentControl x:Name="PART_Content1" />
                         <ContentControl x:Name="PART_Content2" />
@@ -15,4 +15,41 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <Style x:Key="BoardItem" TargetType="ListBoxItem">
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!--  LazyRegionHanger 기본 스타일  -->
+    <Style TargetType="{x:Type local:LazyBoard}">
+        <Setter Property="ItemContainerStyle" Value="{StaticResource BoardItem}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:LazyBoard}">
+                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}">
+                        <ItemsPresenter />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

@@ -5,18 +5,28 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 
 namespace LazyRegion.WPF;
-public class LazyRegion : ContentControl, ILazyRegion
+
+/// <summary>
+/// (KO) LazyRegion의 새로운 이름입니다. 무대(Stage) 기반의 세련된 전환을 제공합니다.
+/// (EN) The new identity of LazyRegion. Provides sophisticated stage-based transitions.
+/// </summary>
+[Obsolete ("LazyRegion is now LazyStage. Please migrate to LazyStage for the new world.")]
+public class LazyRegion : LazyStage
+{
+}
+
+public class LazyStage : ContentControl, ILazyRegion
 {
     public static readonly DependencyProperty RegionNameProperty =
-        DependencyProperty.Register (nameof (RegionName), typeof (string), typeof (LazyRegion),
+        DependencyProperty.Register (nameof (RegionName), typeof (string), typeof (LazyStage),
             new PropertyMetadata (null, OnRegionNameChanged));
 
     public static readonly DependencyProperty TransitionAnimationProperty =
-        DependencyProperty.Register (nameof (TransitionAnimation), typeof (TransitionAnimation), typeof (LazyRegion),
+        DependencyProperty.Register (nameof (TransitionAnimation), typeof (TransitionAnimation), typeof (LazyStage),
             new PropertyMetadata (TransitionAnimation.Fade));
 
     public static readonly DependencyProperty TransitionDurationProperty =
-            DependencyProperty.Register (nameof (TransitionDuration), typeof (Duration), typeof (LazyRegion),
+            DependencyProperty.Register (nameof (TransitionDuration), typeof (Duration), typeof (LazyStage),
                 new PropertyMetadata (new Duration (TimeSpan.FromMilliseconds (300))));
 
     public Duration TransitionDuration
@@ -43,12 +53,12 @@ public class LazyRegion : ContentControl, ILazyRegion
     private ContentControl _currentPresenter;
     private ContentControl _stagingPresenter;
 
-    static LazyRegion()
+    static LazyStage()
     {
-        DefaultStyleKeyProperty.OverrideMetadata (typeof (LazyRegion), new FrameworkPropertyMetadata (typeof (LazyRegion)));
+        DefaultStyleKeyProperty.OverrideMetadata (typeof (LazyStage), new FrameworkPropertyMetadata (typeof (LazyStage)));
     }
 
-    public LazyRegion()
+    public LazyStage()
     {
     }
 

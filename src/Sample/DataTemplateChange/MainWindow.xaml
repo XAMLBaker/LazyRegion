@@ -26,7 +26,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
-        <wpf:LazyRegion Content="{Binding CurrentViewModel}" TransitionAnimation="{Binding SelectAnimationType}" />
+        <wpf:LazyStage Content="{Binding CurrentViewModel}" TransitionAnimation="{Binding SelectAnimationType}" />
         <Border Grid.Column="1" Padding="10">
             <Grid>
                 <ListBox

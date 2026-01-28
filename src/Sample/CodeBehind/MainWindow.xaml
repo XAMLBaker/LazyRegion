@@ -15,7 +15,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
-        <wpf:LazyRegion x:Name="region" />
+        <wpf:LazyStage x:Name="stage" />
         <Border Grid.Column="1" Padding="10">
             <StackPanel Grid.Row="1">
                 <ListBox>

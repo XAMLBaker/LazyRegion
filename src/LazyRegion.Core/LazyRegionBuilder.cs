@@ -15,7 +15,7 @@ namespace LazyRegion.Core
 
         public LazyRegionBuilder Register<T>(
             string key,
-            ServiceLifetime lifetime = ServiceLifetime.Transient)
+            ServiceLifetime lifetime = ServiceLifetime.Singleton)
             where T : class, new()
         {
             _services.AddLazyView<T> (key, lifetime);
@@ -26,7 +26,7 @@ namespace LazyRegion.Core
             string key,
             LazyFactory factory)
         {
-            _services.AddLazyView (key, factory, ServiceLifetime.Transient);
+            _services.AddLazyView (key, factory, ServiceLifetime.Singleton);
             return this;
         }
 

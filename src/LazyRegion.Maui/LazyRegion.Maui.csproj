@@ -40,24 +40,28 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="LazyRegionControl.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 	</ItemGroup>
 
   <!-- Core 프로젝트 참조 -->
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
     <!-- 개발용 -->
-    <ProjectReference Include="..\LazyRegion.Core\LazyRegion.Core.csproj"/>
+    <ProjectReference Include="..\LazyRegion.Core\LazyRegion.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <!-- 배포용 -->
-    <ProjectReference Include="..\LazyRegion.Core\LazyRegion.Core.csproj" PrivateAssets="all"/>
+    <ProjectReference Include="..\LazyRegion.Core\LazyRegion.Core.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- 참조된 프로젝트를 패키지에 포함 -->
   <Target Name="CopyProjectReferencesToPackage" DependsOnTargets="ResolveReferences">
     <ItemGroup>
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths-&gt;WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))" />
     </ItemGroup>
   </Target>
 </Project>

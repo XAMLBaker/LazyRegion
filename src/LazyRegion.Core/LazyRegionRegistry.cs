@@ -7,8 +7,8 @@ namespace LazyRegion.Core
 {
     public static class LazyRegionRegistry
     {
-        private static readonly Dictionary<string, ILazyRegion> _regions = new ();
-        private static readonly Dictionary<string, TaskCompletionSource<ILazyRegion>> _waiters = new ();
+        private static readonly Dictionary<string, ILazyRegionBase> _regions = new ();
+        private static readonly Dictionary<string, TaskCompletionSource<ILazyRegionBase>> _waiters = new ();
         private static readonly Dictionary<string, LoadingRegionBehavior> _behaviors = new ();
 
         private static RegionLoadingOptions? _options;
@@ -37,7 +37,7 @@ namespace LazyRegion.Core
             _manager = manager;
         }
 
-        public static void RegisterRegion(string name, ILazyRegion region)
+        public static void RegisterRegion(string name, ILazyRegionBase region)
         {
             _regions[name] = region;
 
@@ -105,7 +105,7 @@ namespace LazyRegion.Core
             }
         }
         // Step Navigate 전용 래퍼
-        private static async Task NavigateStepAsync(string regionName, string viewKey)
+        public static async Task NavigateStepAsync(string regionName, string viewKey)
         {
             if (_manager is not LazyRegionManager mgr)
                 return;
@@ -125,7 +125,7 @@ namespace LazyRegion.Core
             }
         }
 
-        public static async Task<ILazyRegion> WaitForRegionAsync(
+        public static async Task<ILazyRegionBase> WaitForRegionAsync(
             string name,
             TimeSpan? timeout = null)
         {
