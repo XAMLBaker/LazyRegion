@@ -33,20 +33,20 @@ public interface ILazyRegionItems : ILazyRegionBase
     /// <summary>
     /// Region에 항목 추가
     /// </summary>
-    void AddItem(string viewKey, object item);
+    Task AddItem(string viewKey, object item);
 
     /// <summary>
     /// Region에서 항목 제거
     /// </summary>
-    void RemoveItem(string viewKey, object item);
+    Task RemoveItem(string viewKey, object item);
 
     /// <summary>
     /// Region의 모든 항목 제거
     /// </summary>
-    void ClearItems();
+    Task ClearItems();
 
     /// <summary>
     /// Region에 항목 삽입
     /// </summary>
-    void InsertItem(int index, string viewKey, object item);
+    Task InsertItem(int index, string viewKey, object item);
 }

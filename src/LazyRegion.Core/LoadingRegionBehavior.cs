@@ -52,34 +52,32 @@ namespace LazyRegion.Core
 
         private void StartTimeoutTimer()
         {
-            _timeoutCts = new CancellationTokenSource ();
+            _timeoutCts = new CancellationTokenSource();
 
-            _ = Task.Run (async () =>
+            _ = Task.Run(async () =>
             {
                 try
                 {
-                    TimeSpan span = new TimeSpan();
-                    if (_config.MinDisplayTime > _config.Timeout)
-                        span = _config.MinDisplayTime + _config.Timeout;
-                    else if (_config.MinDisplayTime == _config.Timeout)
-                        span = _config.MinDisplayTime;
-                    else
-                        span = _config.Timeout - _config.MinDisplayTime;
+                    await Task.Delay(_config.Timeout, _timeoutCts.Token);
 
-
-                    await Task.Delay (span, _timeoutCts.Token);
                     // UI 스레드로 전환
-                    if (_uiContext == null)
-                        return;
-
-                    _uiContext.Post (async _ =>
+                    if (_uiContext != null)
                     {
-                        await _regionManager.NavigateAsync (_regionName, _config.ErrorViewKey);
-                    }, null);
+                        _uiContext.Post(async _ =>
+                        {
+                            await _regionManager.NavigateAsync(_regionName, _config.ErrorViewKey);
+                        }, null);
+                    }
                 }
                 catch (TaskCanceledException)
                 {
                     // 정상적으로 Cancel됨
+                }
+                finally
+                {
+                    // 타임아웃이 발생했거나 작업이 취소되었을 때 CTS를 정리합니다.
+                    _timeoutCts?.Dispose();
+                    _timeoutCts = null;
                 }
             });
         }

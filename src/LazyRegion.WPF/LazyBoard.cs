@@ -110,66 +110,61 @@ public class LazyBoard : ListBox, ILazyRegionItems
         ItemsCollection = new ObservableCollection<object> ();
     }
 
-    private Dictionary<string, object> _loadedViews = new Dictionary<string, object> ();
-    public void AddItem(string viewKey, object item)
+    private readonly Dictionary<string, object> _loadedViews = new Dictionary<string, object>();
+    private readonly object _lock = new object();
+
+    public async Task AddItem(string viewKey, object item)
     {
-        if (_loadedViews.ContainsKey (viewKey))
-            return;
-        _loadedViews[viewKey] = item;
-        if (!this.Dispatcher.CheckAccess ())
+        lock (_lock)
         {
-            this.Dispatcher.Invoke (async () =>
-            {
-                ItemsCollection.Add (item);
-            });
-            return;
+            if (_loadedViews.ContainsKey(viewKey))
+                return;
+            _loadedViews[viewKey] = item;
         }
-        ItemsCollection.Add (item);
+
+        await Dispatcher.InvokeAsync(() =>
+        {
+            ItemsCollection.Add(item);
+        });
     }
 
-    public async void RemoveItem(string viewKey, object item)
+    public async Task RemoveItem(string viewKey, object item)
     {
-        if (_loadedViews.ContainsKey (viewKey) == false)
-            return;
-
-        if (!this.Dispatcher.CheckAccess ())
+        lock (_lock)
         {
-            await this.Dispatcher.Invoke (async () =>
-            {
-                await PlayLaunchRemoveAnimationAsync (item);
-                ItemsCollection.Remove (item);
-            });
-            return;
+            if (!_loadedViews.ContainsKey(viewKey))
+                return;
         }
-        await PlayLaunchRemoveAnimationAsync (item);
-        ItemsCollection.Remove (item);
+
+        await Dispatcher.InvokeAsync(async () =>
+        {
+            await PlayLaunchRemoveAnimationAsync(item);
+            ItemsCollection.Remove(item);
+        });
     }
 
-    public void ClearItems()
+    public async Task ClearItems()
     {
-        _loadedViews.Clear ();
-        if (!this.Dispatcher.CheckAccess ())
+        lock (_lock)
         {
-            this.Dispatcher.Invoke (() => ItemsCollection.Clear ());
-            return;
+            _loadedViews.Clear();
         }
-        ItemsCollection.Clear ();
+        await Dispatcher.InvokeAsync(() => ItemsCollection.Clear());
     }
 
-    public void InsertItem(int index, string viewKey, object item)
+    public async Task InsertItem(int index, string viewKey, object item)
     {
-        if (_loadedViews.ContainsKey (viewKey))
-            return;
-        _loadedViews[viewKey] = item;
-        if (!this.Dispatcher.CheckAccess ())
+        lock (_lock)
         {
-            this.Dispatcher.Invoke (async () =>
-            {
-                ItemsCollection.Insert (index, item);
-            });
-            return;
+            if (_loadedViews.ContainsKey(viewKey))
+                return;
+            _loadedViews[viewKey] = item;
         }
-        ItemsCollection.Insert (index, item);
+
+        await Dispatcher.InvokeAsync(() =>
+        {
+            ItemsCollection.Insert(index, item);
+        });
     }
 
     private static void OnRegionNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -201,52 +196,89 @@ public class LazyBoard : ListBox, ILazyRegionItems
 
     private async void ItemsCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
-        // Add/Remove/Insert 등 모든 컬렉션 변경에 반응
-        // ItemsSource는 이미 ObservableCollection을 가리키고 있으니 UI 자동 갱신됨
-
-        if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
+        try
         {
-            var item = e.NewItems[0];
-            await PlayLaunchAddAnimationAsync (item);
+            // Add/Remove/Insert 등 모든 컬렉션 변경에 반응
+            // ItemsSource는 이미 ObservableCollection을 가리키고 있으니 UI 자동 갱신됨
 
-
-            var data = _loadedViews.FirstOrDefault (x => x.Value == item);
-            // [개발자 입장] 외부로 알림 1: 이벤트 발생
-            var args = new LaunchEventArgs (ItemAddedEvent, this, data.Key);
-            RaiseEvent (args);
-
-            // [개발자 입장] 외부로 알림 2: 커맨드 실행
-            if (ItemAddCommand != null)
+            if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
             {
-                ItemAddCommand.Execute (data.Key);
+                var item = e.NewItems[0];
+                await PlayLaunchAddAnimationAsync(item);
+
+                string viewKey;
+                lock (_lock)
+                {
+                    viewKey = _loadedViews.FirstOrDefault(x => x.Value == item).Key;
+                }
+
+                if (viewKey != null)
+                {
+                    // [개발자 입장] 외부로 알림 1: 이벤트 발생
+                    var args = new LaunchEventArgs(ItemAddedEvent, this, viewKey);
+                    RaiseEvent(args);
+
+                    // [개발자 입장] 외부로 알림 2: 커맨드 실행
+                    if (ItemAddCommand != null)
+                    {
+                        ItemAddCommand.Execute(viewKey);
+                    }
+                }
+            }
+            else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            {
+                var item = e.OldItems[0];
+
+                string viewKey;
+                lock (_lock)
+                {
+                    var entry = _loadedViews.FirstOrDefault(x => x.Value == item);
+                    viewKey = entry.Key;
+                    if (viewKey != null)
+                    {
+                        _loadedViews.Remove(viewKey);
+                    }
+                }
+
+                if (viewKey != null)
+                {
+                    // [개발자 입장] 외부로 알림 1: 이벤트 발생
+                    var args = new LaunchEventArgs(ItemRemovedEvent, this, viewKey);
+                    RaiseEvent(args);
+
+                    // [개발자 입장] 외부로 알림 2: 커맨드 실행
+                    if (ItemRemoveCommand != null)
+                    {
+                        ItemRemoveCommand.Execute(viewKey);
+                    }
+                }
             }
         }
-        else if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+        catch (Exception)
         {
-            var item = e.OldItems[0];
-
-            var data = _loadedViews.FirstOrDefault (x => x.Value == item);
-            // [개발자 입장] 외부로 알림 1: 이벤트 발생
-            var args = new LaunchEventArgs (ItemRemovedEvent, this, data.Key);
-            RaiseEvent (args);
-
-            // [개발자 입장] 외부로 알림 2: 커맨드 실행
-            if (ItemRemoveCommand != null)
-            {
-                ItemRemoveCommand.Execute (data.Key);
-            }
-            _loadedViews.Remove (data.Key);
+            // TODO: Add logging
         }
     }
 
-    protected override void OnMouseDoubleClick(MouseButtonEventArgs e)
+    protected override async void OnMouseDoubleClick(MouseButtonEventArgs e)
     {
-        base.OnMouseDoubleClick (e);
+        base.OnMouseDoubleClick(e);
         if (SelectedItem != null)
         {
-            var data = _loadedViews.FirstOrDefault (x => x.Value == SelectedItem);
+            string viewKey;
+            object viewValue;
 
-            RemoveItem (data.Key, data.Value);
+            lock (_lock)
+            {
+                var entry = _loadedViews.FirstOrDefault(x => x.Value == SelectedItem);
+                viewKey = entry.Key;
+                viewValue = entry.Value;
+            }
+
+            if (viewKey != null)
+            {
+                await RemoveItem(viewKey, viewValue);
+            }
         }
     }
 

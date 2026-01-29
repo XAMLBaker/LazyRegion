@@ -89,25 +89,33 @@ public class LazyStage : ContentControl, ILazyRegion
 
     protected override async void OnContentChanged(object oldContent, object newContent)
     {
-        base.OnContentChanged (oldContent, newContent);
+        base.OnContentChanged(oldContent, newContent);
 
         if (_currentPresenter == null || _stagingPresenter == null)
             return;
-        // ⭐️ Dispatcher를 사용하여 UI 스레드 접근을 보장
-        // Content 변경 이벤트가 UI 스레드가 아닌 곳에서 발생했더라도 안전하게 처리합니다.
-        if (!this.Dispatcher.CheckAccess ())
+        
+        try
         {
-            this.Dispatcher.Invoke (async () => await InternalNavigation (newContent));
-            return;
-        }
+            // ⭐️ Dispatcher를 사용하여 UI 스레드 접근을 보장
+            // Content 변경 이벤트가 UI 스레드가 아닌 곳에서 발생했더라도 안전하게 처리합니다.
+            if (!this.Dispatcher.CheckAccess())
+            {
+                await this.Dispatcher.InvokeAsync(async () => await InternalNavigation(newContent));
+                return;
+            }
 
-        // 이미 UI 스레드인 경우 (기존 로직)
-        await InternalNavigation (newContent);
+            // 이미 UI 스레드인 경우 (기존 로직)
+            await InternalNavigation(newContent);
+        }
+        catch (Exception)
+        {
+            // TODO: Add logging
+        }
     }
 
     private static void OnRegionNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is LazyRegion region && !string.IsNullOrEmpty (region.RegionName))
+        if (d is LazyStage region && !string.IsNullOrEmpty (region.RegionName))
         {
             LazyRegionRegistry.RegisterRegion (region.RegionName, region);
         }
@@ -322,9 +330,10 @@ public class LazyStage : ContentControl, ILazyRegion
 
     public void Set(object content, object dataContext = null)
     {
+        if (dataContext != null && content is FrameworkElement element)
+        {
+            element.DataContext = dataContext;
+        }
         this.Content = content;
-        if (dataContext == null)
-            return;
-        this._currentPresenter.DataContext = dataContext;
     }
 }

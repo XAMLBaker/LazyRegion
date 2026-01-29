@@ -9,5 +9,6 @@ namespace LazyRegion.Core
         public Type? ViewType { get; set; }
         public ServiceLifetime Lifetime { get; set; }
         public LazyFactory Factory { get; set; } = null!;
+        public object? Instance { get; set; }
     }
 }

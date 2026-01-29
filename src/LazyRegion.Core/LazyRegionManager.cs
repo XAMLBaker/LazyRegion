@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using LazyRegion.Core.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ namespace LazyRegion.Core
     public sealed class LazyRegionManager : ILazyRegionManager
     {
         private readonly IServiceProvider _sp;
-        private readonly Dictionary<string, ViewRegistration> _views = new ();
+        private readonly Dictionary<string, ViewRegistration> _views = new();
 
         public IServiceProvider ServiceProvider => _sp;
         public LazyRegionManager(
@@ -17,10 +18,10 @@ namespace LazyRegion.Core
             RegionLoadingOptions? options = null)
         {
             _sp = sp;
-            registry.Initialize (this);
+            registry.Initialize(this);
 
             if (options != null)
-                LazyRegionRegistry.Initialize (options, this);
+                LazyRegionRegistry.Initialize(options, this);
         }
 
         public void RegisterView(
@@ -49,13 +50,13 @@ namespace LazyRegion.Core
 
             LazyRegionRegistry.NotifyNavigationCompleted (regionName, viewKey);
             RegionMap.Register (regionName, view);
-        }
-
+            }
+            
         public async Task NavigateAsync<T>(
             string regionName,
             string viewKey,
             TimeSpan? timeout = null)
-        {
+            {
             var baseRegion = await LazyRegionRegistry.WaitForRegionAsync (regionName, timeout);
             var vm = _sp.GetRequiredService<T> ();
             var view = GetOrCreate (viewKey);
@@ -71,9 +72,16 @@ namespace LazyRegion.Core
         {
             var reg = _views[key];
 
-            var view = reg.Factory (_sp);
+            if (reg.Lifetime == ServiceLifetime.Singleton)
+            {
+                if (reg.Instance == null)
+                {
+                    reg.Instance = reg.Factory(_sp);
+                }
+                return reg.Instance;
+            }
 
-            return view;
+            return reg.Factory(_sp);
         }
         /// <summary>
         /// ILazyRegionItems를 구현한 Region에 항목을 추가합니다.
@@ -87,7 +95,7 @@ namespace LazyRegion.Core
             if (region is ILazyRegionItems itemsRegion)
             {
                 var view = GetOrCreate (viewKey);
-                itemsRegion.AddItem (viewKey, view);
+                await itemsRegion.AddItem (viewKey, view);
             }
         }
 
@@ -105,7 +113,7 @@ namespace LazyRegion.Core
                 foreach (var viewKey in viewKeys)
                 {
                     var view = GetOrCreate(viewKey);
-                    itemsRegion.AddItem(viewKey, view);
+                    await itemsRegion.AddItem(viewKey, view);
                     await Task.Delay (150);
                 }
             }
@@ -123,7 +131,7 @@ namespace LazyRegion.Core
             if (region is ILazyRegionItems itemsRegion)
             {
                 var view = GetOrCreate (viewKey);
-                itemsRegion.RemoveItem (viewKey, view);
+                await itemsRegion.RemoveItem (viewKey, view);
             }
         }
 
@@ -137,7 +145,7 @@ namespace LazyRegion.Core
             var region = await LazyRegionRegistry.WaitForRegionAsync (regionName, timeout);
             if (region is ILazyRegionItems itemsRegion)
             {
-                itemsRegion.ClearItems ();
+                await itemsRegion.ClearItems ();
             }
         }
 
@@ -154,8 +162,9 @@ namespace LazyRegion.Core
             if (region is ILazyRegionItems itemsRegion)
             {
                 var view = GetOrCreate (viewKey);
-                itemsRegion.InsertItem (index, viewKey, view);
+                await itemsRegion.InsertItem (index, viewKey, view);
             }
         }
     }
 }
+
