@@ -1,0 +1,73 @@
+name: Publish Knotty
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get Version from Tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+    - name: Get tag message
+      id: tag_message
+      run: |
+        echo "MESSAGE<<EOF" >> $GITHUB_OUTPUT
+        git for-each-ref refs/tags/v${{ steps.get_version.outputs.VERSION }} \
+        --format='%(contents)' >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install MAUI workload
+      run: dotnet workload install maui
+
+    - name: Pack Library
+      # -o out 옵션으로 루트 폴더의 out 디렉토리에 패키지 생성
+      run: |
+          dotnet pack src/LazyRegion.WPF/LazyRegion.WPF.csproj \
+          -c Release \
+          /p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
+          -o out
+  
+          dotnet pack src/LazyRegion.Maui/LazyRegion.Maui.csproj \
+          -c Release \
+          /p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
+          -o out
+  
+          dotnet pack src/LazyRegion.Core/LazyRegion.Core.csproj \
+          -c Release \
+          /p:PackageVersion=${{ steps.get_version.outputs.VERSION }} \
+          -o out
+
+    - name: Push to NuGet
+      # 생성된 루트/out 폴더 내의 nupkg 파일을 NuGet에 업로드
+      run: dotnet nuget push out/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        # 생성된 패키지 파일을 GitHub Release에도 첨부
+        files: out/*.nupkg
+        name: Release v${{ steps.get_version.outputs.VERSION }}
+        body: |
+          ### 🧶 Knotty v${{ steps.get_version.outputs.VERSION }} Release
+
+          ${{ steps.tag_message.outputs.MESSAGE || 'No release notes provided.' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
