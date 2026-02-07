@@ -1,4 +1,4 @@
-name: Publish Knotty
+name: Publish LazyRegion
 
 on:
   push:
@@ -17,14 +17,14 @@ jobs:
       with:
         fetch-depth: 0
 
-    # Tag -> Version Ï∂îÏ∂ú (bash Í≥†Ï†ï)
+    # Tag -> Version √ﬂ√‚ (bash ∞Ì¡§)
     - name: Get Version from Tag
       id: get_version
       shell: bash
       run: |
         echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-    # Annotated / Lightweight tag Î™®Îëê ÎåÄÏùë
+    # Annotated / Lightweight tag ∏µŒ ¥Î¿¿
     - name: Get tag message
       id: tag_message
       shell: bash
@@ -41,10 +41,15 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: |
+          8.0.x
+          9.0.x
 
     - name: Install MAUI workload
       run: dotnet workload install maui
+
+    - name: Build the packages
+      run: dotnet build .\LazyRegion_Build.sln -c Release /p:Version=$env:Version
 
     - name: Pack Libraries
       shell: bash
@@ -56,10 +61,12 @@ jobs:
         dotnet pack /p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out src/LazyRegion.Core/LazyRegion.Core.csproj
 
     - name: Push to NuGet
-      run: dotnet nuget push out/*.nupkg \
-        --api-key ${{ secrets.NUGET_API_KEY }} \
-        --source https://api.nuget.org/v3/index.json \
-        --skip-duplicate
+      shell: bash
+      run: |
+        dotnet nuget push out/*.nupkg \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json \
+          --skip-duplicate
 
     - name: Create Release
       uses: softprops/action-gh-release@v2
