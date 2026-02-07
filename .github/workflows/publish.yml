@@ -54,11 +54,11 @@ jobs:
     - name: Pack Libraries
       shell: bash
       run: |
-        dotnet pack /p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out src/LazyRegion.WPF/LazyRegion.WPF.csproj
+        dotnet pack -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out "src/LazyRegion.WPF/LazyRegion.WPF.csproj"
 
-        dotnet pack /p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out src/LazyRegion.Maui/LazyRegion.Maui.csproj
+        dotnet pack -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out "src/LazyRegion.Maui/LazyRegion.Maui.csproj"
         
-        dotnet pack /p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out src/LazyRegion.Core/LazyRegion.Core.csproj
+        dotnet pack -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out "src/LazyRegion.Core/LazyRegion.Core.csproj"
 
     - name: Push to NuGet
       shell: bash
