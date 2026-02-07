@@ -113,19 +113,57 @@ public class LazyStage : ContentView, ILazyRegion
 
     private void HandleRegionContentChanged(object oldContent, object newContent)
     {
-        MainThread.BeginInvokeOnMainThread (() => {
-           _ = NavigationInternal (newContent);
-        });
+        try
+        {
+            // 항상 MainThread에서 처리하되, 중복 호출 방지
+            if (MainThread.IsMainThread)
+            {
+                // 이미 UI 스레드에서는 즉시 실행하지 않고 다음 UI cycle로 연기
+                Dispatcher.Dispatch(async () =>
+                {
+                    try
+                    {
+                        await InternalNavigation(newContent);
+                    }
+                    catch (Exception)
+                    {
+                        // TODO: Add logging
+                    }
+                });
+            }
+            else
+            {
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    try
+                    {
+                        await InternalNavigation(newContent);
+                    }
+                    catch (Exception)
+                    {
+                        // TODO: Add logging
+                    }
+                });
+            }
+        }
+        catch (Exception)
+        {
+            // TODO: Add logging
+        }
     }
 
     // Public API similar to WPF Set
     public void Set(object content, object dataContext = null)
     {
-        RegionContent = content;
-        if (dataContext != null && _currentPresenter != null)
+        if (dataContext != null)
         {
-            _currentPresenter.BindingContext = dataContext;
+            // Store dataContext to apply after navigation completes
+            if (content is View view)
+            {
+                view.BindingContext = dataContext;
+            }
         }
+        RegionContent = content;
     }
 
     private void ResetInitTransforms(ContentView presenter)
@@ -133,29 +171,85 @@ public class LazyStage : ContentView, ILazyRegion
         if (presenter == null)
             return;
 
-        presenter.AbortAnimation ("transition"); // best-effort cancel
         presenter.TranslationX = 0;
         presenter.TranslationY = 0;
         presenter.Scale = 1;
         presenter.Opacity = 1;
     }
 
-    private async Task NavigationInternal(object newContent)
+    private object _pendingContent;
+    private readonly object _navigationLock = new object();
+
+    private async Task InternalNavigation(object newContent)
     {
-        if (_currentPresenter == null || _stagingPresenter == null)
-            return;
+        lock (_navigationLock)
+        {
+            if (_isNavigating)
+            {
+                // Queue the latest request to process after current navigation completes
+                _pendingContent = newContent;
+                return;
+            }
+            _isNavigating = true;
+        }
 
-        if (_isNavigating)
-            return;
+        await ProcessNavigationQueue(newContent);
+    }
 
-        _isNavigating = true;
+    private async Task ProcessNavigationQueue(object initialContent)
+    {
+        object currentContent = initialContent;
 
+        try
+        {
+            while (currentContent != null)
+            {
+                await PerformTransition(currentContent);
+
+                // Check for pending content
+                lock (_navigationLock)
+                {
+                    currentContent = _pendingContent;
+                    _pendingContent = null;
+                }
+            }
+        }
+        finally
+        {
+            lock (_navigationLock)
+            {
+                _isNavigating = false;
+            }
+        }
+    }
+
+    private async Task PerformTransition(object newContent)
+    {
         if (newContent is View content)
         {
             _stagingPresenter.Content = content;
         }
 
-        // Prepare presenters
+        // Ensure staging presenter is visible before any transition
+        _stagingPresenter.IsVisible = true;
+
+        if (TransitionAnimation != TransitionAnimation.None)
+        {
+            var duration = TransitionDuration;
+            await PrepareAnimation(_currentPresenter, _stagingPresenter, duration);
+        }
+
+        // Complete swap
+        CompleteTransition();
+    }
+
+    private async Task PrepareAnimation(ContentView outgoing, ContentView incoming, TimeSpan duration)
+    {
+        // Cancel any running animations on both presenters
+        _currentPresenter.CancelAnimations();
+        _stagingPresenter.CancelAnimations();
+
+        // Reset transforms (visibility is already set in PerformTransition)
         ResetInitTransforms (_currentPresenter);
         ResetInitTransforms (_stagingPresenter);
 
@@ -163,9 +257,7 @@ public class LazyStage : ContentView, ILazyRegion
         _currentPresenter.ZIndex = 0;
         _stagingPresenter.ZIndex = 1;
 
-        _stagingPresenter.IsVisible = true;
-
-        var durationMs = (int)TransitionDuration.TotalMilliseconds;
+        var durationMs = (int)duration.TotalMilliseconds;
         var easing = Easing.CubicInOut;
 
         Task incomingTask = Task.CompletedTask;
@@ -256,30 +348,39 @@ public class LazyStage : ContentView, ILazyRegion
         {
             // ignore animation cancellation exceptions
         }
-
-        // Complete swap
-        CompleteTransition ();
     }
 
     private void CompleteTransition()
     {
-        // Clear previous content
+        // Clear previous content and reset outgoing presenter completely
         _currentPresenter.Content = null;
-        _currentPresenter.IsVisible = false;
+        ResetPresenter(_currentPresenter);
 
         // Swap presenters
         (_currentPresenter, _stagingPresenter) = (_stagingPresenter, _currentPresenter);
 
+        // Configure new current presenter (now visible)
         _currentPresenter.ZIndex = 1;
-        _stagingPresenter.ZIndex = 0;
-
         _currentPresenter.IsVisible = true;
+
+        // Configure new staging presenter (hidden and ready for next use)
+        _stagingPresenter.ZIndex = 0;
         _stagingPresenter.IsVisible = false;
+    }
 
-        // Reset transforms for both
-        ResetInitTransforms (_currentPresenter);
-        ResetInitTransforms (_stagingPresenter);
+    private void ResetPresenter(ContentView presenter)
+    {
+        if (presenter == null)
+            return;
 
-        _isNavigating = false;
+        // Cancel any running animations
+        presenter.CancelAnimations();
+
+        presenter.IsVisible = false;
+        presenter.TranslationX = 0;
+        presenter.TranslationY = 0;
+        presenter.Scale = 1;
+        presenter.Opacity = 1;
+        presenter.ZIndex = 0;
     }
 }
