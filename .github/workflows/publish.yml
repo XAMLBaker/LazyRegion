@@ -49,7 +49,7 @@ jobs:
       run: dotnet workload install maui
 
     - name: Build the packages
-      run: dotnet build .\LazyRegion_Build.sln -c Release /p:Version=$env:Version
+      run: dotnet build .\LazyRegion_Build.sln -c Release /p:Version=${{ steps.get_version.outputs.VERSION }}
 
     - name: Pack Libraries
       shell: bash
