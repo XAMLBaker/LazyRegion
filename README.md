@@ -14,11 +14,13 @@ WPF 및 .NET MAUI 환경 모두에서 사용할 수 있으며, Region 기반의 
 
 ## ✨ 주요 특징
 
-- 🎞 **부드러운 화면 전환** – 설정된 효과에 따라 자연스러운 애니메이션 적용  
-- 🧩 **MVVM 완전 지원** – ViewModel 변경만으로 자동 전환  
-- 💻 **Code-behind 지원** – 코드에서 직접 `Content` 변경 시에도 동일한 전환 처리  
-- 📦 **RegionManager 통합** – 지정된 Region을 동적으로 전환 가능  
-- 🌍 **멀티 플랫폼 지원** – **WPF**와 **.NET MAUI**에서 모두 사용 가능  
+- 🎞 **부드러운 화면 전환** – 설정된 효과에 따라 자연스러운 애니메이션 적용
+- 🧩 **MVVM 완전 지원** – ViewModel 변경만으로 자동 전환
+- 💻 **Code-behind 지원** – 코드에서 직접 `Content` 변경 시에도 동일한 전환 처리
+- 📦 **RegionManager 통합** – 지정된 Region을 동적으로 전환 가능
+- 🌍 **멀티 플랫폼 지원** – **WPF**와 **.NET MAUI**에서 모두 사용 가능
+- 🔌 **Static 진입점** – `LazyRegionApp.Default`로 DI 없이도 바로 사용 가능
+- 🗂 **Tab 내비게이션** – `LazyTabRegion`으로 스와이프 제스처 기반 탭 전환 (MAUI)
 
 ---
 
@@ -229,6 +231,63 @@ UseLazyRegion은 람다 구성을 통해 **View 등록과 Region 설정**을 한
 - 앱 초기 부트스트랩 코드를 간결하게 유지하고 싶은 경우
 - Region 및 View 구성을 한 파일에서 명확히 정의하고 싶은 경우
 - 초기 네비게이션 흐름을 선언적으로 관리하고 싶은 경우
+
+---
+
+### 🔹 Static 진입점 (LazyRegionApp.Default)
+
+DI 환경이 없어도 `LazyRegionApp.Default`를 통해 뷰 등록 및 내비게이션이 가능합니다.
+WPF CustomControl처럼 생성자 DI가 불가능한 환경에서 특히 유용합니다.
+
+```csharp
+// 앱 시작 시 등록 (DI 불필요)
+LazyRegionApp.Default
+    .Register<HomeView>("home")
+    .Register<LoginView>("login");
+
+// ViewModel 또는 CustomControl에서 접근
+LazyRegionApp.Default.RegionManager.NavigateAsync("Root", "home");
+```
+
+- DI(`UseLazyRegion()`)와 Static 경로를 동시에 사용 가능하며, 동일한 인스턴스를 공유합니다.
+- `Register()` 전에 `UseLazyRegion()`을 호출하면 등록 내용이 자동으로 DI 컨테이너에 통합됩니다.
+
+---
+
+### 🔹 LazyTabRegion (MAUI)
+
+MAUI 전용 탭 내비게이션 컨트롤입니다.
+스와이프 제스처와 완전한 커스텀 NavigationBar를 지원합니다.
+
+```xml
+<lz:LazyTabRegion
+    TransitionAnimation="SlideLeft"
+    SwipeThreshold="0.4"
+    NavigationBarPlacement="Bottom"
+    SelectionChanged="OnSelectionChanged">
+
+    <lz:LazyTabRegion.NavigationBar>
+        <!-- 사용자가 자유롭게 구성하는 탭 바 -->
+    </lz:LazyTabRegion.NavigationBar>
+
+    <lz:LazyTabItem Key="home"/>
+    <lz:LazyTabItem Key="search"/>
+    <lz:LazyTabItem Key="settings"/>
+</lz:LazyTabRegion>
+```
+
+```csharp
+// MauiProgram.cs — Key 등록
+LazyRegionApp.Default
+    .Register<HomeView>("home")
+    .Register<SearchView>("search")
+    .Register<SettingsView>("settings");
+```
+
+- Slide 계열 애니메이션 선택 시 스와이프 제스처 자동 활성화
+- NavigationBar는 빈 슬롯으로 제공되어 자유롭게 배치 가능
+- `LazyTabItem Key="..."` 방식으로 LazyRegion의 Key 등록 패턴을 그대로 유지
+
 ---
 
 ### 정리
