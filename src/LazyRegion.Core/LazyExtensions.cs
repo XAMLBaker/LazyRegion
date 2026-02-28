@@ -53,10 +53,15 @@ namespace LazyRegion.Core
             });
 
             services.AddSingleton<ILazyRegionManager> (sp =>
-                new LazyRegionManager (
+            {
+                var mgr = new LazyRegionManager (
                     sp,
                     sp.GetRequiredService<LazyViewRegistry> (),
-                    sp.GetService<RegionLoadingOptions> ()));
+                    sp.GetService<RegionLoadingOptions> ());
+
+                LazyRegionApp.SetManager (mgr);
+                return mgr;
+            });
 
             return services;
         }

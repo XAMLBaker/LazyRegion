@@ -16,6 +16,13 @@ namespace LazyRegion.Core
 
         private static readonly HashSet<string> _initialFlowExecuted = new ();
         public static Func<ILazyRegionManager, string, string, Task>? NavigateHandler;
+
+        /// <summary>
+        /// Static 경로에서 RegisterRegion 최초 호출 시 매니저를 초기화하는 콜백입니다.
+        /// UseWpf() / UseMaui() 등에서 설정되며, 한 번 실행 후 즉시 해제됩니다.
+        /// </summary>
+        public static Action? OnManagerRequested { get; set; }
+
         // 기존 API 유지
         public static void SetLoadingConfigs(
             Dictionary<string, RegionLoadingConfig> configs,
@@ -39,6 +46,13 @@ namespace LazyRegion.Core
 
         public static void RegisterRegion(string name, ILazyRegionBase region)
         {
+            // Static 경로: 창이 열리기 직전 최초 1회만 초기화
+            if (OnManagerRequested != null)
+            {
+                OnManagerRequested.Invoke ();
+                OnManagerRequested = null;
+            }
+
             _regions[name] = region;
 
             if (_options?.TryGet (name, out var cfg) == true &&

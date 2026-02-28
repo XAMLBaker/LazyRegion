@@ -8,6 +8,9 @@ public static class Extensions
         this MauiAppBuilder builder,
         Action<LazyRegionBuilder>? lazy = null)
     {
+        if (LazyRegionApp.HasPendingRegistrations)
+            LazyRegionApp.ApplyTo (builder.Services);
+
         if (lazy != null)
         {
             var lazyBuilder = new LazyRegionBuilder (builder.Services);
