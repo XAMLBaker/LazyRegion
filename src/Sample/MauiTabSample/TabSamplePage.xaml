@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MauiTabSample.TabSamplePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:lz="clr-namespace:LazyRegion.Maui;assembly=LazyRegion.Maui"
+    Title="LazyTabRegion Sample"
+    BackgroundColor="#1C1C1E">
+
+    <Grid RowDefinitions="Auto, *">
+
+        <!-- ── 상단: 애니메이션 선택 ── -->
+        <Grid
+            Grid.Row="0"
+            Padding="16,10"
+            ColumnDefinitions="Auto, *, Auto"
+            BackgroundColor="#2C2C2E">
+
+            <Label
+                Grid.Column="0"
+                Text="Animation"
+                TextColor="#8E8E93"
+                FontSize="13"
+                VerticalOptions="Center"
+                Margin="0,0,10,0"/>
+
+            <Picker
+                x:Name="animPicker"
+                Grid.Column="1"
+                TextColor="White"
+                TitleColor="#8E8E93"
+                VerticalOptions="Center"
+                SelectedIndexChanged="OnAnimationChanged">
+                <Picker.Items>
+                    <x:String>None</x:String>
+                    <x:String>Fade</x:String>
+                    <x:String>NewFromLeft</x:String>
+                    <x:String>NewFromRight</x:String>
+                    <x:String>NewFromUp</x:String>
+                    <x:String>NewFromDown</x:String>
+                    <x:String>SlideLeft</x:String>
+                    <x:String>NewFromRight</x:String>
+                    <x:String>SlideRight</x:String>
+                    <x:String>SlideUp</x:String>
+                    <x:String>SlideDown</x:String>
+                    <x:String>Scale</x:String>
+                    <x:String>ZoomIn</x:String>
+                    <x:String>ZoomOut</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <Border
+                Grid.Column="2"
+                x:Name="swipeBadge"
+                Padding="8,3"
+                BackgroundColor="#3A3A3C"
+                StrokeShape="RoundRectangle 6"
+                VerticalOptions="Center">
+                <Label
+                    x:Name="swipeBadgeLabel"
+                    Text="Swipe: OFF"
+                    FontSize="11"
+                    TextColor="#636366"/>
+            </Border>
+        </Grid>
+
+        <!-- ── LazyTabRegion ── -->
+        <lz:LazyTabRegion
+            x:Name="tabRegion"
+            Grid.Row="1"
+            SelectedIndex="0"
+            TransitionAnimation="SlideLeft"
+            SwipeThreshold="0.4"
+            NavigationBarPlacement="Bottom"
+            SelectionChanged="OnSelectionChanged">
+
+            <!-- NavigationBar: 사용자 자유 배치 슬롯 -->
+            <lz:LazyTabRegion.NavigationBar>
+                <Grid
+                    ColumnDefinitions="*,*,*,*"
+                    BackgroundColor="#2C2C2E"
+                    HeightRequest="60">
+
+                    <!-- 구분선 (상단) -->
+                    <BoxView
+                        Grid.ColumnSpan="4"
+                        HeightRequest="1"
+                        BackgroundColor="#3A3A3C"
+                        VerticalOptions="Start"/>
+
+                    <!-- Tab A -->
+                    <VerticalStackLayout
+                        Grid.Column="0"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Spacing="3">
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectCommand, Source={x:Reference tabRegion}}"
+                                CommandParameter="0"/>
+                        </VerticalStackLayout.GestureRecognizers>
+                        <Label x:Name="tabLabelA" Text="A" FontSize="18" FontAttributes="Bold"
+                               TextColor="#E74C3C" HorizontalOptions="Center"/>
+                        <BoxView x:Name="tabBarA" HeightRequest="3" WidthRequest="24"
+                                 BackgroundColor="#E74C3C" CornerRadius="2"/>
+                    </VerticalStackLayout>
+
+                    <!-- Tab B -->
+                    <VerticalStackLayout
+                        Grid.Column="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Spacing="3">
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectCommand, Source={x:Reference tabRegion}}"
+                                CommandParameter="1"/>
+                        </VerticalStackLayout.GestureRecognizers>
+                        <Label x:Name="tabLabelB" Text="B" FontSize="18" FontAttributes="Bold"
+                               TextColor="White" HorizontalOptions="Center"/>
+                        <BoxView x:Name="tabBarB" HeightRequest="3" WidthRequest="24"
+                                 BackgroundColor="#3498DB" CornerRadius="2" IsVisible="False"/>
+                    </VerticalStackLayout>
+
+                    <!-- Tab C -->
+                    <VerticalStackLayout
+                        Grid.Column="2"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Spacing="3">
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectCommand, Source={x:Reference tabRegion}}"
+                                CommandParameter="2"/>
+                        </VerticalStackLayout.GestureRecognizers>
+                        <Label x:Name="tabLabelC" Text="C" FontSize="18" FontAttributes="Bold"
+                               TextColor="White" HorizontalOptions="Center"/>
+                        <BoxView x:Name="tabBarC" HeightRequest="3" WidthRequest="24"
+                                 BackgroundColor="#2ECC71" CornerRadius="2" IsVisible="False"/>
+                    </VerticalStackLayout>
+
+                    <!-- Tab D -->
+                    <VerticalStackLayout
+                        Grid.Column="3"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Spacing="3">
+                        <VerticalStackLayout.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SelectCommand, Source={x:Reference tabRegion}}"
+                                CommandParameter="3"/>
+                        </VerticalStackLayout.GestureRecognizers>
+                        <Label x:Name="tabLabelD" Text="D" FontSize="18" FontAttributes="Bold"
+                               TextColor="White" HorizontalOptions="Center"/>
+                        <BoxView x:Name="tabBarD" HeightRequest="3" WidthRequest="24"
+                                 BackgroundColor="#9B59B6" CornerRadius="2" IsVisible="False"/>
+                    </VerticalStackLayout>
+
+                </Grid>
+            </lz:LazyTabRegion.NavigationBar>
+
+            <!-- ── 탭 아이템 4개 (Key 등록 방식) ── -->
+            <lz:LazyTabItem Key="TabA"/>
+            <lz:LazyTabItem Key="TabB"/>
+            <lz:LazyTabItem Key="TabC"/>
+            <lz:LazyTabItem Key="TabD"/>
+
+        </lz:LazyTabRegion>
+
+    </Grid>
+</ContentPage>

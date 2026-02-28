@@ -37,6 +37,8 @@ namespace LazyRegion.Core
             };
         }
 
+        public object GetView(string viewKey) => GetOrCreate(viewKey);
+
         public async Task NavigateAsync(
             string regionName,
             string viewKey,

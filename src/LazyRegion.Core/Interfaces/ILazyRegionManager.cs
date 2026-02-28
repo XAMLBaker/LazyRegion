@@ -36,4 +36,6 @@ public interface ILazyRegionManager : ILazyRegionManagerBase
         string viewKey,
         ServiceLifetime lifetime,
         LazyFactory factory);
+
+    object GetView(string viewKey);
 }
