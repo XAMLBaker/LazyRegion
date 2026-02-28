@@ -75,12 +75,11 @@ namespace LazyRegion.Core
                 }
                 finally
                 {
-                    // 타임아웃이 발생했거나 작업이 취소되었을 때 CTS를 정리합니다.
-                    _timeoutCts?.Dispose();
-                    _timeoutCts = null;
+                    StopTimeoutTimer ();
                 }
             });
         }
+
         public void OnNavigationCompleted(string viewKey)
         {
             // Loading/Error View가 아니면 완료 처리
@@ -90,6 +89,7 @@ namespace LazyRegion.Core
                 _ = CompleteAsync ();
             }
         }
+
         private async Task CompleteAsync()
         {
             // MinDisplayTime 체크
@@ -101,9 +101,21 @@ namespace LazyRegion.Core
                 await Task.Delay (remaining);
             }
 
-            // Timeout 취소
-            _timeoutCts?.Cancel ();
-            _timeoutCts?.Dispose ();
+            StopTimeoutTimer ();
+        }
+
+        /// <summary>
+        /// _timeoutCts를 원자적으로 취소 및 해제합니다.
+        /// Interlocked.Exchange로 하나의 스레드만 정리를 수행하도록 보장합니다.
+        /// </summary>
+        private void StopTimeoutTimer()
+        {
+            var cts = Interlocked.Exchange (ref _timeoutCts, null);
+            if (cts == null)
+                return;
+
+            cts.Cancel ();
+            cts.Dispose ();
         }
     }
 }

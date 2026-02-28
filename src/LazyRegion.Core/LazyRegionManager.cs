@@ -70,7 +70,12 @@ namespace LazyRegion.Core
 
         private object GetOrCreate(string key)
         {
-            var reg = _views[key];
+            if (string.IsNullOrWhiteSpace (key))
+                throw new ArgumentException ("View key cannot be null or empty.", nameof (key));
+
+            if (!_views.TryGetValue (key, out var reg))
+                throw new InvalidOperationException (
+                    $"View '{key}' is not registered. Call AddLazyView or Register before navigating.");
 
             if (reg.Lifetime == ServiceLifetime.Singleton)
             {

@@ -8,7 +8,7 @@ namespace LazyRegion.Core
     public static class LazyRegionRegistry
     {
         private static readonly Dictionary<string, ILazyRegionBase> _regions = new ();
-        private static readonly Dictionary<string, TaskCompletionSource<ILazyRegionBase>> _waiters = new ();
+        private static readonly Dictionary<string, List<TaskCompletionSource<ILazyRegionBase>>> _waiters = new ();
         private static readonly Dictionary<string, LoadingRegionBehavior> _behaviors = new ();
 
         private static RegionLoadingOptions? _options;
@@ -59,9 +59,10 @@ namespace LazyRegion.Core
                 }
             }
 
-            if (_waiters.TryGetValue (name, out var tcs))
+            if (_waiters.TryGetValue (name, out var waitList))
             {
-                tcs.TrySetResult (region);
+                foreach (var tcs in waitList)
+                    tcs.TrySetResult (region);
                 _waiters.Remove (name);
             }
         }
@@ -129,22 +130,46 @@ namespace LazyRegion.Core
             string name,
             TimeSpan? timeout = null)
         {
+            if (string.IsNullOrWhiteSpace (name))
+                throw new ArgumentException ("Region name cannot be null or empty.", nameof (name));
+
             if (_regions.TryGetValue (name, out var region))
                 return region;
 
-            var tcs = _waiters.TryGetValue (name, out var w)
-                ? w
-                : _waiters[name] = new ();
+            // 호출자별 독립 TCS 생성
+            var tcs = new TaskCompletionSource<ILazyRegionBase> ();
+
+            if (!_waiters.TryGetValue (name, out var list))
+            {
+                list = new List<TaskCompletionSource<ILazyRegionBase>> ();
+                _waiters[name] = list;
+            }
+            list.Add (tcs);
+
+            using var cts = new CancellationTokenSource ();
 
             var delay = timeout.HasValue
-                ? Task.Delay (timeout.Value)
-                : Task.Delay (Timeout.Infinite);
+                ? Task.Delay (timeout.Value, cts.Token)
+                : Task.Delay (Timeout.Infinite, cts.Token);
 
             var done = await Task.WhenAny (tcs.Task, delay);
-            if (done == delay)
-                throw new TimeoutException (name);
 
-            return await tcs.Task;
+            if (done == tcs.Task)
+            {
+                cts.Cancel ();
+                return await tcs.Task;
+            }
+
+            // 타임아웃: 자신의 TCS만 제거, 리스트가 비면 키 자체를 정리
+            if (_waiters.TryGetValue (name, out var timeoutList))
+            {
+                timeoutList.Remove (tcs);
+                if (timeoutList.Count == 0)
+                    _waiters.Remove (name);
+            }
+
+            throw new TimeoutException (
+                $"Region '{name}' was not registered within the specified timeout.");
         }
 
         public static void NotifyNavigationCompleted(string region, string viewKey)
