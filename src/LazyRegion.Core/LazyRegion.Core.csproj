@@ -24,4 +24,9 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.9" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="LazyRegion.WPF" />
+    <InternalsVisibleTo Include="LazyRegion.Maui" />
+  </ItemGroup>
+
 </Project>
