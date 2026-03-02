@@ -122,6 +122,8 @@ public class LazyTabRegion : ContentView
     private bool _isSwiping;
     private int _swipeTargetIndex = -1;
     private int _currentIndex = -1;
+    private int? _pendingTabIndex;
+    private NavigationDirection? _pendingDirection;
 
     #endregion
 
@@ -274,22 +276,60 @@ public class LazyTabRegion : ContentView
 
     private async Task PerformTabTransition(int targetIndex, NavigationDirection direction)
     {
-        if (_isTransitioning) return;
+        if (_isTransitioning)
+        {
+            // Queue the latest request (latest wins, intermediate requests are discarded)
+            _pendingTabIndex = targetIndex;
+            _pendingDirection = direction;
+            return;
+        }
         _isTransitioning = true;
 
         try
         {
-            _stagingPresenter.Content = ResolveView (Items[targetIndex]);
-            _stagingPresenter.IsVisible = true;
+            int currentTarget = targetIndex;
+            NavigationDirection currentDirection = direction;
 
-            var resolved = ResolveAnimation (TransitionAnimation, direction);
+            while (true)
+            {
+                try
+                {
+                    _stagingPresenter.Content = ResolveView (Items[currentTarget]);
+                    _stagingPresenter.IsVisible = true;
 
-            if (resolved != TransitionAnimation.None)
-                await RunAnimation (_currentPresenter, _stagingPresenter, resolved, TransitionDuration);
+                    // Yield to allow MAUI to measure/arrange the new content
+                    await Task.Yield();
 
-            CompleteTransition ();
-            _currentIndex = targetIndex;
-            ItemCount = Items.Count;
+                    var resolved = ResolveAnimation (TransitionAnimation, currentDirection);
+
+                    if (resolved != TransitionAnimation.None)
+                        await RunAnimation (_currentPresenter, _stagingPresenter, resolved, TransitionDuration);
+
+                    CompleteTransition ();
+                    _currentIndex = currentTarget;
+                    ItemCount = Items.Count;
+                }
+                catch
+                {
+                    ForceResetPresenters ();
+                }
+
+                // Allow MAUI's rendering pipeline to commit visual tree changes
+                await Task.Yield();
+
+                // Check for pending tab transition
+                if (_pendingTabIndex.HasValue)
+                {
+                    currentTarget = _pendingTabIndex.Value;
+                    currentDirection = _pendingDirection ?? NavigationDirection.Forward;
+                    _pendingTabIndex = null;
+                    _pendingDirection = null;
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
         finally
         {
@@ -413,16 +453,27 @@ public class LazyTabRegion : ContentView
 
     private void CompleteTransition()
     {
+        _currentPresenter.BatchBegin();
         _currentPresenter.Content = null;
         ResetPresenter (_currentPresenter);
+        _currentPresenter.BatchCommit();
 
         (_currentPresenter, _stagingPresenter) = (_stagingPresenter, _currentPresenter);
 
+        _currentPresenter.BatchBegin();
+        _currentPresenter.CancelAnimations ();
+        _currentPresenter.TranslationX = 0;
+        _currentPresenter.TranslationY = 0;
+        _currentPresenter.Scale = 1;
+        _currentPresenter.Opacity = 1;
         _currentPresenter.ZIndex = 1;
         _currentPresenter.IsVisible = true;
+        _currentPresenter.BatchCommit();
 
+        _stagingPresenter.BatchBegin();
         _stagingPresenter.ZIndex = 0;
         _stagingPresenter.IsVisible = false;
+        _stagingPresenter.BatchCommit();
     }
 
     private void ResetTransforms(ContentView presenter)
@@ -442,6 +493,31 @@ public class LazyTabRegion : ContentView
         presenter.Scale = 1;
         presenter.Opacity = 1;
         presenter.ZIndex = 0;
+    }
+
+    private void ForceResetPresenters()
+    {
+        _currentPresenter.CancelAnimations ();
+        _stagingPresenter.CancelAnimations ();
+
+        _currentPresenter.BatchBegin();
+        _currentPresenter.TranslationX = 0;
+        _currentPresenter.TranslationY = 0;
+        _currentPresenter.Scale = 1;
+        _currentPresenter.Opacity = 1;
+        _currentPresenter.ZIndex = 1;
+        _currentPresenter.IsVisible = true;
+        _currentPresenter.BatchCommit();
+
+        _stagingPresenter.BatchBegin();
+        _stagingPresenter.Content = null;
+        _stagingPresenter.TranslationX = 0;
+        _stagingPresenter.TranslationY = 0;
+        _stagingPresenter.Scale = 1;
+        _stagingPresenter.Opacity = 1;
+        _stagingPresenter.ZIndex = 0;
+        _stagingPresenter.IsVisible = false;
+        _stagingPresenter.BatchCommit();
     }
 
     #endregion

@@ -204,7 +204,21 @@ public class LazyStage : ContentView, ILazyRegion
         {
             while (currentContent != null)
             {
-                await PerformTransition(currentContent);
+                try
+                {
+                    await PerformTransition(currentContent);
+                }
+                catch
+                {
+                    // Transition failed - force clean state so presenters aren't stuck
+                    // in an intermediate visual state (e.g., wrong Opacity/Translation)
+                    ForceResetPresenters();
+                }
+
+                // Allow MAUI's rendering pipeline to commit visual tree changes
+                // from CompleteTransition before starting the next transition.
+                // Without this, back-to-back transitions starve the layout system.
+                await Task.Yield();
 
                 // Check for pending content
                 lock (_navigationLock)
@@ -232,6 +246,11 @@ public class LazyStage : ContentView, ILazyRegion
 
         // Ensure staging presenter is visible before any transition
         _stagingPresenter.IsVisible = true;
+
+        // Yield to allow MAUI to measure/arrange the new content.
+        // Without this, the staging content may have zero size during animation,
+        // or Width/Height used for slide calculations may be incorrect.
+        await Task.Yield();
 
         if (TransitionAnimation != TransitionAnimation.None)
         {
@@ -352,20 +371,33 @@ public class LazyStage : ContentView, ILazyRegion
 
     private void CompleteTransition()
     {
-        // Clear previous content and reset outgoing presenter completely
+        // Batch outgoing presenter cleanup to prevent intermediate native view states
+        _currentPresenter.BatchBegin();
         _currentPresenter.Content = null;
         ResetPresenter(_currentPresenter);
+        _currentPresenter.BatchCommit();
 
         // Swap presenters
         (_currentPresenter, _stagingPresenter) = (_stagingPresenter, _currentPresenter);
 
-        // Configure new current presenter (now visible)
+        // Batch all property changes on the new current presenter so MAUI applies
+        // them as a single native update (prevents flicker from intermediate states
+        // such as Opacity=0 being briefly visible before being reset to 1)
+        _currentPresenter.BatchBegin();
+        _currentPresenter.CancelAnimations();
+        _currentPresenter.TranslationX = 0;
+        _currentPresenter.TranslationY = 0;
+        _currentPresenter.Scale = 1;
+        _currentPresenter.Opacity = 1;
         _currentPresenter.ZIndex = 1;
         _currentPresenter.IsVisible = true;
+        _currentPresenter.BatchCommit();
 
         // Configure new staging presenter (hidden and ready for next use)
+        _stagingPresenter.BatchBegin();
         _stagingPresenter.ZIndex = 0;
         _stagingPresenter.IsVisible = false;
+        _stagingPresenter.BatchCommit();
     }
 
     private void ResetPresenter(ContentView presenter)
@@ -382,5 +414,32 @@ public class LazyStage : ContentView, ILazyRegion
         presenter.Scale = 1;
         presenter.Opacity = 1;
         presenter.ZIndex = 0;
+    }
+
+    private void ForceResetPresenters()
+    {
+        _currentPresenter.CancelAnimations();
+        _stagingPresenter.CancelAnimations();
+
+        // Current presenter: keep its content, restore to visible clean state
+        _currentPresenter.BatchBegin();
+        _currentPresenter.TranslationX = 0;
+        _currentPresenter.TranslationY = 0;
+        _currentPresenter.Scale = 1;
+        _currentPresenter.Opacity = 1;
+        _currentPresenter.ZIndex = 1;
+        _currentPresenter.IsVisible = true;
+        _currentPresenter.BatchCommit();
+
+        // Staging presenter: clear and hide for next use
+        _stagingPresenter.BatchBegin();
+        _stagingPresenter.Content = null;
+        _stagingPresenter.TranslationX = 0;
+        _stagingPresenter.TranslationY = 0;
+        _stagingPresenter.Scale = 1;
+        _stagingPresenter.Opacity = 1;
+        _stagingPresenter.ZIndex = 0;
+        _stagingPresenter.IsVisible = false;
+        _stagingPresenter.BatchCommit();
     }
 }

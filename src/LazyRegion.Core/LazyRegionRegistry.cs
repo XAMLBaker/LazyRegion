@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,14 +8,15 @@ namespace LazyRegion.Core
 {
     public static class LazyRegionRegistry
     {
-        private static readonly Dictionary<string, ILazyRegionBase> _regions = new ();
+        private static readonly ConcurrentDictionary<string, ILazyRegionBase> _regions = new ();
         private static readonly Dictionary<string, List<TaskCompletionSource<ILazyRegionBase>>> _waiters = new ();
-        private static readonly Dictionary<string, LoadingRegionBehavior> _behaviors = new ();
+        private static readonly object _waitersLock = new ();
+        private static readonly ConcurrentDictionary<string, LoadingRegionBehavior> _behaviors = new ();
 
         private static RegionLoadingOptions? _options;
         private static ILazyRegionManagerBase? _manager;
 
-        private static readonly HashSet<string> _initialFlowExecuted = new ();
+        private static readonly ConcurrentDictionary<string, byte> _initialFlowExecuted = new ();
         public static Func<ILazyRegionManager, string, string, Task>? NavigateHandler;
 
         /// <summary>
@@ -59,25 +61,27 @@ namespace LazyRegion.Core
              _manager != null)
             {
                 if (cfg.InitialFlow != null &&
-                    !_initialFlowExecuted.Contains (name))
+                    _initialFlowExecuted.TryAdd (name, 0))
                 {
-                    _initialFlowExecuted.Add (name);
                     _ = RunInitialFlowAsync (name, cfg.InitialFlow);
                 }
 
                 if (!_behaviors.ContainsKey (name))
                 {
                     var b = new LoadingRegionBehavior (name, region, cfg, _manager);
-                    b.Attach ();
-                    _behaviors[name] = b;
+                    if (_behaviors.TryAdd (name, b))
+                        b.Attach ();
                 }
             }
 
-            if (_waiters.TryGetValue (name, out var waitList))
+            lock (_waitersLock)
             {
-                foreach (var tcs in waitList)
-                    tcs.TrySetResult (region);
-                _waiters.Remove (name);
+                if (_waiters.TryGetValue (name, out var waitList))
+                {
+                    foreach (var tcs in waitList)
+                        tcs.TrySetResult (region);
+                    _waiters.Remove (name);
+                }
             }
         }
         private static async Task RunInitialFlowAsync(
@@ -153,12 +157,19 @@ namespace LazyRegion.Core
             // 호출자별 독립 TCS 생성
             var tcs = new TaskCompletionSource<ILazyRegionBase> ();
 
-            if (!_waiters.TryGetValue (name, out var list))
+            lock (_waitersLock)
             {
-                list = new List<TaskCompletionSource<ILazyRegionBase>> ();
-                _waiters[name] = list;
+                // Double-check: lock 획득 사이에 등록되었을 수 있음
+                if (_regions.TryGetValue (name, out region))
+                    return region;
+
+                if (!_waiters.TryGetValue (name, out var list))
+                {
+                    list = new List<TaskCompletionSource<ILazyRegionBase>> ();
+                    _waiters[name] = list;
+                }
+                list.Add (tcs);
             }
-            list.Add (tcs);
 
             using var cts = new CancellationTokenSource ();
 
@@ -175,11 +186,14 @@ namespace LazyRegion.Core
             }
 
             // 타임아웃: 자신의 TCS만 제거, 리스트가 비면 키 자체를 정리
-            if (_waiters.TryGetValue (name, out var timeoutList))
+            lock (_waitersLock)
             {
-                timeoutList.Remove (tcs);
-                if (timeoutList.Count == 0)
-                    _waiters.Remove (name);
+                if (_waiters.TryGetValue (name, out var timeoutList))
+                {
+                    timeoutList.Remove (tcs);
+                    if (timeoutList.Count == 0)
+                        _waiters.Remove (name);
+                }
             }
 
             throw new TimeoutException (
