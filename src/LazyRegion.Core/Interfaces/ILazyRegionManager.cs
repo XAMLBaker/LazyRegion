@@ -9,6 +9,9 @@ public interface ILazyRegionManagerBase
     Task NavigateAsync(string regionName, string viewKey, TimeSpan? regionWaitTimeout = null);
     Task NavigateAsync<T>(string regionName, string viewKey, TimeSpan? regionWaitTimeout = null);
 
+    Task NavigateAsync(string regionName, string viewKey, LazyNavigationParameters parameters, TimeSpan? regionWaitTimeout = null);
+    Task NavigateAsync<T>(string regionName, string viewKey, LazyNavigationParameters parameters, TimeSpan? regionWaitTimeout = null);
+
     Task AddItemAsync(
             string regionName,
             string viewKey,

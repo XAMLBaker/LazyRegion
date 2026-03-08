@@ -21,6 +21,8 @@ WPF 및 .NET MAUI 환경 모두에서 사용할 수 있으며, Region 기반의 
 - 🌍 **멀티 플랫폼 지원** – **WPF**와 **.NET MAUI**에서 모두 사용 가능
 - 🔌 **Static 진입점** – `LazyRegionApp.Default`로 DI 없이도 바로 사용 가능
 - 🗂 **Tab 내비게이션** – `LazyTabRegion`으로 스와이프 제스처 기반 탭 전환 (MAUI)
+- 🔔 **ViewModel 라이프사이클 훅** – `ILazyNavigationAware`로 전환 이벤트 수신 및 파라미터 전달
+- 🛡 **네비게이션 Guard** – `ILazyNavigationGuard`로 전환 전 취소 가능
 
 ---
 
@@ -298,8 +300,114 @@ LazyRegionApp.Default
 
 ---
 
+### 🔹 ViewModel 라이프사이클 훅 (ILazyNavigationAware)
+
+ViewModel이 `ILazyNavigationAware`를 구현하면 Region 전환 시 라이프사이클 이벤트를 받을 수 있습니다.
+인터페이스를 구현하지 않은 ViewModel은 기존과 완전히 동일하게 동작합니다.
+
+```csharp
+public class HomeViewModel : ILazyNavigationAware
+{
+    public void OnNavigatedTo(LazyNavigationContext context)
+    {
+        // 이 뷰가 Region의 활성 콘텐츠가 될 때 호출
+        // context.Parameters로 전달된 파라미터 수신 가능
+    }
+
+    public void OnNavigatedFrom(LazyNavigationContext context)
+    {
+        // 다른 뷰로 전환되기 직전에 호출
+        // 구독 해제, 리소스 정리 등
+    }
+}
+```
+
+#### 호출 시점
+
+| 메서드 | 호출 시점 |
+|--------|-----------|
+| `OnNavigatedFrom` | `Set()` 호출 전 (애니메이션 시작 전) |
+| `OnNavigatedTo` | `Set()` 호출 직후 (애니메이션 시작 직후) |
+
+> `ILazyNavigationAware`는 `NavigateAsync<T>(...)`로 ViewModel을 DI에서 주입받는 경로에서만 동작합니다.
+
+---
+
+### 🔹 네비게이션 파라미터 (LazyNavigationParameters)
+
+전환 시 ViewModel에 데이터를 전달할 수 있습니다.
+
+```csharp
+// 전환 호출
+await regionManager.NavigateAsync<DetailViewModel>(
+    “MainRegion”,
+    “Detail”,
+    new LazyNavigationParameters
+    {
+        { “OrderId”, 42 },
+        { “Mode”, EditMode.ReadOnly }
+    });
+
+// ViewModel에서 수신
+public void OnNavigatedTo(LazyNavigationContext context)
+{
+    var orderId = context.Parameters.GetValue<int>(“OrderId”);
+    var mode = context.Parameters.GetValueOrDefault<EditMode>(“Mode”, EditMode.View);
+}
+```
+
+#### LazyNavigationParameters API
+
+| 메서드 | 설명 |
+|--------|------|
+| `Add(key, value)` | 파라미터 추가 |
+| `GetValue<T>(key)` | 값 반환, 없으면 예외 |
+| `GetValueOrDefault<T>(key, default)` | 값 반환, 없으면 기본값 |
+| `TryGetValue<T>(key, out value)` | 안전한 값 조회 |
+| `ContainsKey(key)` | 키 존재 여부 확인 |
+
+---
+
+### 🔹 네비게이션 Guard (ILazyNavigationGuard)
+
+`ILazyNavigationGuard`를 구현하면 전환이 시작되기 전에 취소 여부를 결정할 수 있습니다.
+`false`를 반환하면 전환이 중단되고 `OnNavigatedFrom`도 호출되지 않습니다.
+
+```csharp
+public class EditViewModel : ILazyNavigationAware, ILazyNavigationGuard
+{
+    private bool _hasUnsavedChanges;
+
+    public async Task<bool> CanNavigateAsync(LazyNavigationContext context)
+    {
+        if (!_hasUnsavedChanges)
+            return true;
+
+        // 비동기 확인 다이얼로그 등
+        return await ShowConfirmDialogAsync(“저장하지 않은 변경사항이 있습니다. 나가시겠습니까?”);
+    }
+
+    public void OnNavigatedTo(LazyNavigationContext context) { }
+    public void OnNavigatedFrom(LazyNavigationContext context) { }
+}
+```
+
+#### 전환 흐름
+
+```
+NavigateAsync 호출
+  ├─ CanNavigateAsync() → false  →  전환 취소 (종료)
+  ├─ CanNavigateAsync() → true
+  ├─ OnNavigatedFrom() (이전 VM)
+  ├─ Set() → 애니메이션 시작
+  └─ OnNavigatedTo() (새 VM)
+```
+
+---
+
 ### 정리
 
 - **Initial Flow**는 “앱 시작 시 실행되는 시나리오”를 선언적으로 표현하기 위한 기능입니다.
 - Region 생성 시점, 로딩 상태, 실패 처리, 조건 분기를 하나의 흐름으로 구성할 수 있습니다.
 - 복잡한 초기 네비게이션 로직을 코드 흐름 그대로 읽을 수 있도록 설계되었습니다.
+- **ViewModel 라이프사이클 훅**은 선택적 구현으로, 기존 코드에 영향을 주지 않습니다.

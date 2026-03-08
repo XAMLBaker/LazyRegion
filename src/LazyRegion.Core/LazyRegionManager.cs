@@ -1,6 +1,7 @@
 ﻿using LazyRegion.Core.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace LazyRegion.Core
     {
         private readonly IServiceProvider _sp;
         private readonly Dictionary<string, ViewRegistration> _views = new();
+        private readonly ConcurrentDictionary<string, object?> _regionViewModels = new();
 
         public IServiceProvider ServiceProvider => _sp;
         public LazyRegionManager(
@@ -39,35 +41,65 @@ namespace LazyRegion.Core
 
         public object GetView(string viewKey) => GetOrCreate(viewKey);
 
-        public async Task NavigateAsync(
+        public Task NavigateAsync(
             string regionName,
             string viewKey,
             TimeSpan? timeout = null)
+            => NavigateInternalAsync(regionName, viewKey, null, null, timeout);
+
+        public Task NavigateAsync<T>(
+            string regionName,
+            string viewKey,
+            TimeSpan? timeout = null)
+            => NavigateInternalAsync(regionName, viewKey, _sp.GetRequiredService<T>(), null, timeout);
+
+        public Task NavigateAsync(
+            string regionName,
+            string viewKey,
+            LazyNavigationParameters parameters,
+            TimeSpan? timeout = null)
+            => NavigateInternalAsync(regionName, viewKey, null, parameters, timeout);
+
+        public Task NavigateAsync<T>(
+            string regionName,
+            string viewKey,
+            LazyNavigationParameters parameters,
+            TimeSpan? timeout = null)
+            => NavigateInternalAsync(regionName, viewKey, _sp.GetRequiredService<T>(), parameters, timeout);
+
+        private async Task NavigateInternalAsync(
+            string regionName,
+            string viewKey,
+            object? viewModel,
+            LazyNavigationParameters? parameters,
+            TimeSpan? timeout)
         {
-            var baseRegion = await LazyRegionRegistry.WaitForRegionAsync (regionName, timeout);
-            var view = GetOrCreate (viewKey);
-            if (baseRegion is ILazyRegion region)
-                region.Set (view);
+            var context = new LazyNavigationContext(regionName, viewKey, parameters);
 
+            _regionViewModels.TryGetValue(regionName, out var oldVm);
 
-            LazyRegionRegistry.NotifyNavigationCompleted (regionName, viewKey);
-            RegionMap.Register (regionName, view);
-            }
-            
-        public async Task NavigateAsync<T>(
-            string regionName,
-            string viewKey,
-            TimeSpan? timeout = null)
+            if (oldVm is ILazyNavigationGuard guard)
             {
-            var baseRegion = await LazyRegionRegistry.WaitForRegionAsync (regionName, timeout);
-            var vm = _sp.GetRequiredService<T> ();
-            var view = GetOrCreate (viewKey);
+                if (!await guard.CanNavigateAsync(context))
+                    return;
+            }
+
+            if (oldVm is ILazyNavigationAware oldAware)
+                oldAware.OnNavigatedFrom(context);
+
+            var baseRegion = await LazyRegionRegistry.WaitForRegionAsync(regionName, timeout);
+            var view = GetOrCreate(viewKey);
 
             if (baseRegion is ILazyRegion region)
-                region.Set (view,vm);
+                region.Set(view, viewModel);
 
-            LazyRegionRegistry.NotifyNavigationCompleted (regionName, viewKey);
-            RegionMap.Register (regionName, view);
+            if (viewModel is ILazyNavigationAware newAware)
+                newAware.OnNavigatedTo(context);
+
+            _regionViewModels[regionName] = viewModel;
+
+            LazyRegionRegistry.NotifyNavigationCompleted(regionName, viewKey);
+            RegionMap.Register(regionName, view);
         }
 
         private object GetOrCreate(string key)
