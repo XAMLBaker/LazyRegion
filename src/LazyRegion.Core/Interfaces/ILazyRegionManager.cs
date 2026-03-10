@@ -12,6 +12,19 @@ public interface ILazyRegionManagerBase
     Task NavigateAsync(string regionName, string viewKey, LazyNavigationParameters parameters, TimeSpan? regionWaitTimeout = null);
     Task NavigateAsync<T>(string regionName, string viewKey, LazyNavigationParameters parameters, TimeSpan? regionWaitTimeout = null);
 
+    // Animation override overloads
+    Task NavigateAsync(string regionName, string viewKey, TransitionAnimation animation, TimeSpan? regionWaitTimeout = null);
+    Task NavigateAsync<T>(string regionName, string viewKey, TransitionAnimation animation, TimeSpan? regionWaitTimeout = null);
+    Task NavigateAsync(string regionName, string viewKey, LazyNavigationParameters parameters, TransitionAnimation animation, TimeSpan? regionWaitTimeout = null);
+    Task NavigateAsync<T>(string regionName, string viewKey, LazyNavigationParameters parameters, TransitionAnimation animation, TimeSpan? regionWaitTimeout = null);
+
+    // GoBack
+    bool CanGoBack(string regionName);
+    Task<bool> GoBackAsync(string regionName, TimeSpan? timeout = null);
+
+    // Region group navigation
+    Task NavigateGroupAsync(params (string regionName, string viewKey, TransitionAnimation? animation)[] navigations);
+
     Task AddItemAsync(
             string regionName,
             string viewKey,

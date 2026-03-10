@@ -43,6 +43,12 @@ public partial class MainViewModel : ObservableObject
         await this._lazyRegionManager.NavigateAsync ("Root", views[idx++]);
     }
 
+    [RelayCommand]
+    private async Task Back()
+    {
+        await this._lazyRegionManager.GoBackAsync ("Root"); 
+    }
+
     private void Run()
     {
     }

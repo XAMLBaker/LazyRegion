@@ -48,6 +48,7 @@ public class LazyStage : ContentControl, ILazyRegion
     }
 
     private bool _isNavigating;
+    private TransitionAnimation? _animationOverride;
 
     // Staging 방식: 현재 표시되는 presenter와 준비 중인 presenter
     private ContentControl _currentPresenter;
@@ -161,12 +162,12 @@ public class LazyStage : ContentControl, ILazyRegion
         }
         else
         {
-            // ViewModel이나 다른 객체인 경우
             _stagingPresenter.Content = newContent;
         }
-        if (TransitionAnimation != TransitionAnimation.None)
+
+        var animation = ResolveAnimation();
+        if (animation != TransitionAnimation.None)
         {
-            // 2. 애니메이션 준비
             var duration = TransitionDuration.TimeSpan;
             var sb = new Storyboard ();
             var tcs = new TaskCompletionSource<bool> ();
@@ -178,28 +179,24 @@ public class LazyStage : ContentControl, ILazyRegion
                     tcs.SetResult (true);
                 }
             };
-            // 3. 애니메이션 타입에 따른 처리
-            PrepareAnimation (sb, _currentPresenter, _stagingPresenter, duration);
+            PrepareAnimation (sb, _currentPresenter, _stagingPresenter, duration, animation);
 
-            // 4. 애니메이션 실행
             sb.Begin ();
             await tcs.Task;
         }
-        // 5. 애니메이션 완료 후 정리
         CompleteTransition ();
-}
+    }
 
-    private void PrepareAnimation(Storyboard sb, ContentControl outgoing, ContentControl incoming, TimeSpan duration)
+    private void PrepareAnimation(Storyboard sb, ContentControl outgoing, ContentControl incoming, TimeSpan duration, TransitionAnimation animation)
     {
         incoming.Visibility = Visibility.Visible;
         ResetInitTransforms (_currentPresenter);
         ResetInitTransforms (_stagingPresenter);
 
-        // Z-Index 초기화
         Panel.SetZIndex (outgoing, 0);
         Panel.SetZIndex (incoming, 1);
 
-        switch (TransitionAnimation)
+        switch (animation)
         {
             case TransitionAnimation.Fade:
                 AddFadeAnimation (sb, outgoing, 1, 0, duration);
@@ -328,6 +325,8 @@ public class LazyStage : ContentControl, ILazyRegion
         sb.Children.Add (animY);
     }
 
+    public TransitionAnimation CurrentAnimation => TransitionAnimation;
+
     public void Set(object content, object dataContext = null)
     {
         if (dataContext != null && content is FrameworkElement element)
@@ -335,5 +334,18 @@ public class LazyStage : ContentControl, ILazyRegion
             element.DataContext = dataContext;
         }
         this.Content = content;
+    }
+
+    public void Set(object content, object dataContext, TransitionAnimation? animationOverride)
+    {
+        _animationOverride = animationOverride;
+        Set(content, dataContext);
+    }
+
+    private TransitionAnimation ResolveAnimation()
+    {
+        var anim = _animationOverride ?? TransitionAnimation;
+        _animationOverride = null;
+        return anim;
     }
 }

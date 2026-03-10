@@ -3,7 +3,6 @@ using LazyVoom.Core;
 using RegionManager_Version2;
 using RegionManager_Version2.ViewModels;
 using RegionManager_Version2.Views;
-
 var builder = Host.CreateApplicationBuilder ();
 builder.Services.AddSingleton<MainViewModel> ();
 
@@ -30,8 +29,7 @@ builder.Services.UseLazyRegion (lazy =>
                 });
 
 var app = builder.BuildApp<App, MainWindow> ();  // 🔥
-
-app.OnStartUpAsync = async provider =>
+app.StartHostAsync = async provider =>
 {
     Voom.Instance
        .WithContainerResolver (type =>

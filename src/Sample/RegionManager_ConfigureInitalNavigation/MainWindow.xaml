@@ -22,12 +22,18 @@
                     VerticalAlignment="Top"
                     ItemsSource="{Binding TransitionAnimations}"
                     SelectedItem="{Binding SelectAnimationType}" />
-                <Button
-                    Width="100"
-                    Height="50"
-                    VerticalAlignment="Bottom"
-                    Command="{Binding GoCommand}"
-                    Content="변환" />
+                <StackPanel VerticalAlignment="Bottom">
+                    <Button
+                        Width="100"
+                        Height="50"
+                        Command="{Binding GoCommand}"
+                        Content="변환" />
+                    <Button
+                        Width="100"
+                        Height="50"
+                        Command="{Binding BackCommand}"
+                        Content="이전" />
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

@@ -23,6 +23,9 @@ WPF 및 .NET MAUI 환경 모두에서 사용할 수 있으며, Region 기반의 
 - 🗂 **Tab 내비게이션** – `LazyTabRegion`으로 스와이프 제스처 기반 탭 전환 (MAUI)
 - 🔔 **ViewModel 라이프사이클 훅** – `ILazyNavigationAware`로 전환 이벤트 수신 및 파라미터 전달
 - 🛡 **네비게이션 Guard** – `ILazyNavigationGuard`로 전환 전 취소 가능
+- 🎬 **Per-Navigation 애니메이션 오버라이드** – 전환별로 다른 애니메이션 지정 가능
+- ⏪ **GoBack** – 직전 화면으로 역방향 애니메이션과 함께 복귀
+- 🔗 **Region 그룹 네비게이션** – 여러 Region을 동시에 전환 (리전별 애니메이션)
 
 ---
 
@@ -405,9 +408,83 @@ NavigateAsync 호출
 
 ---
 
+### 🔹 Per-Navigation 애니메이션 오버라이드
+
+기본 `TransitionAnimation` 프로퍼티와 별개로, 개별 전환 호출마다 다른 애니메이션을 지정할 수 있습니다.
+
+```csharp
+// 이번 전환만 SlideLeft로 실행
+await regionManager.NavigateAsync("MainRegion", "Detail", TransitionAnimation.SlideLeft);
+
+// ViewModel 주입 + 파라미터 + 애니메이션 오버라이드 조합
+await regionManager.NavigateAsync<DetailViewModel>(
+    "MainRegion",
+    "Detail",
+    new LazyNavigationParameters { { "Id", 42 } },
+    TransitionAnimation.ZoomIn);
+```
+
+- 오버라이드는 1회성으로, 해당 전환에만 적용되고 이후에는 컨트롤의 기본 애니메이션으로 복귀합니다.
+- 오버라이드를 지정하지 않으면 기존과 동일하게 `TransitionAnimation` 프로퍼티 값이 사용됩니다.
+
+---
+
+### 🔹 GoBack (이전 화면 복귀)
+
+직전에 표시되었던 화면으로 자동 역방향 애니메이션과 함께 복귀합니다.
+
+```csharp
+// 뒤로 갈 수 있는지 확인
+if (regionManager.CanGoBack("MainRegion"))
+{
+    await regionManager.GoBackAsync("MainRegion");
+}
+```
+
+#### 역방향 애니메이션 매핑
+
+| 원래 애니메이션 | GoBack 시 |
+|----------------|-----------|
+| `SlideLeft` | `SlideRight` |
+| `SlideRight` | `SlideLeft` |
+| `SlideUp` | `SlideDown` |
+| `SlideDown` | `SlideUp` |
+| `NewFromLeft` | `NewFromRight` |
+| `NewFromRight` | `NewFromLeft` |
+| `ZoomIn` | `ZoomOut` |
+| `ZoomOut` | `ZoomIn` |
+| `Fade`, `Scale`, `None` | 동일 (대칭) |
+
+- GoBack은 depth=1로, 직전 1개 화면만 지원합니다.
+- GoBack 후에는 `CanGoBack`이 `false`가 됩니다.
+- Singleton View의 경우 DataContext가 유지되므로 ViewModel 상태도 보존됩니다.
+
+---
+
+### 🔹 Region 그룹 네비게이션
+
+여러 Region을 동시에 전환할 수 있습니다. 각 Region별로 독립적인 애니메이션을 지정할 수 있습니다.
+
+```csharp
+await regionManager.NavigateGroupAsync(
+    ("HeaderRegion", "DetailHeader", TransitionAnimation.Fade),
+    ("ContentRegion", "DetailContent", TransitionAnimation.SlideLeft),
+    ("SidebarRegion", "DetailSidebar", null)  // null이면 기본 애니메이션 사용
+);
+```
+
+- `Task.WhenAll`로 병렬 실행되어 모든 Region이 동시에 전환됩니다.
+- Guard가 거부한 Region은 해당 Region만 전환이 취소되고, 나머지는 정상 진행됩니다.
+- 각 Region은 독립적으로 동작하므로 서로 영향을 주지 않습니다.
+
+---
+
 ### 정리
 
 - **Initial Flow**는 “앱 시작 시 실행되는 시나리오”를 선언적으로 표현하기 위한 기능입니다.
 - Region 생성 시점, 로딩 상태, 실패 처리, 조건 분기를 하나의 흐름으로 구성할 수 있습니다.
 - 복잡한 초기 네비게이션 로직을 코드 흐름 그대로 읽을 수 있도록 설계되었습니다.
 - **ViewModel 라이프사이클 훅**은 선택적 구현으로, 기존 코드에 영향을 주지 않습니다.
+- **애니메이션 오버라이드**는 전환별 1회성 적용으로, 기본 설정에 영향을 주지 않습니다.
+- **GoBack**은 depth=1로 간결하게 유지하여, 불필요한 메모리 사용 없이 직전 화면 복귀를 지원합니다.
+- **Region 그룹 네비게이션**으로 복잡한 다중 Region 레이아웃을 한 번의 호출로 제어할 수 있습니다.

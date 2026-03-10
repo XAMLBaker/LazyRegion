@@ -9,7 +9,9 @@ public interface ILazyRegionBase
 
 public interface ILazyRegion : ILazyRegionBase
 {
+    TransitionAnimation CurrentAnimation { get; }
     void Set(object content = null, object dataContext = null);
+    void Set(object content, object dataContext, TransitionAnimation? animationOverride);
 }
 
 

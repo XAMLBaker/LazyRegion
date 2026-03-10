@@ -55,6 +55,7 @@ public class LazyStage : ContentView, ILazyRegion
     private ContentView _currentPresenter;
     private ContentView _stagingPresenter;
     private bool _isNavigating;
+    private TransitionAnimation? _animationOverride;
 
     public LazyStage()
     {
@@ -152,6 +153,8 @@ public class LazyStage : ContentView, ILazyRegion
         }
     }
 
+    public TransitionAnimation CurrentAnimation => TransitionAnimation;
+
     // Public API similar to WPF Set
     public void Set(object content, object dataContext = null)
     {
@@ -164,6 +167,19 @@ public class LazyStage : ContentView, ILazyRegion
             }
         }
         RegionContent = content;
+    }
+
+    public void Set(object content, object dataContext, TransitionAnimation? animationOverride)
+    {
+        _animationOverride = animationOverride;
+        Set(content, dataContext);
+    }
+
+    private TransitionAnimation ResolveAnimation()
+    {
+        var anim = _animationOverride ?? TransitionAnimation;
+        _animationOverride = null;
+        return anim;
     }
 
     private void ResetInitTransforms(ContentView presenter)
@@ -252,17 +268,18 @@ public class LazyStage : ContentView, ILazyRegion
         // or Width/Height used for slide calculations may be incorrect.
         await Task.Yield();
 
-        if (TransitionAnimation != TransitionAnimation.None)
+        var animation = ResolveAnimation();
+        if (animation != TransitionAnimation.None)
         {
             var duration = TransitionDuration;
-            await PrepareAnimation(_currentPresenter, _stagingPresenter, duration);
+            await PrepareAnimation(_currentPresenter, _stagingPresenter, duration, animation);
         }
 
         // Complete swap
         CompleteTransition();
     }
 
-    private async Task PrepareAnimation(ContentView outgoing, ContentView incoming, TimeSpan duration)
+    private async Task PrepareAnimation(ContentView outgoing, ContentView incoming, TimeSpan duration, TransitionAnimation animation)
     {
         // Cancel any running animations on both presenters
         _currentPresenter.CancelAnimations();
@@ -282,7 +299,7 @@ public class LazyStage : ContentView, ILazyRegion
         Task incomingTask = Task.CompletedTask;
         Task outgoingTask = Task.CompletedTask;
 
-        switch (TransitionAnimation)
+        switch (animation)
         {
             case TransitionAnimation.Fade:
                 _stagingPresenter.Opacity = 0;
