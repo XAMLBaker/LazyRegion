@@ -30,5 +30,8 @@
     <InternalsVisibleTo Include="LazyRegion.Maui" />
     <InternalsVisibleTo Include="LazyRegion.WinUI3" />
   </ItemGroup>
-
+  
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 </Project>
