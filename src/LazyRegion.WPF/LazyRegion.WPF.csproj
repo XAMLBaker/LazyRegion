@@ -47,4 +47,8 @@
   <ItemGroup>
     <Compile Remove="LazyRegionControl.cs" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 </Project>
