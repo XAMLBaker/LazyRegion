@@ -13,7 +13,8 @@
     <PackageId>LazyRegion.WinUI3</PackageId>
     <Authors>lukewire</Authors>
     <Description>Content &lt;-&gt; Content 간의 애니메이션 처리 LazyRegion 컨트롤</Description>
-    <PackageTags>LazyRegion;Animation;WinUI3;Control</PackageTags>
+    <PackageTags>LazyRegion;Animation;WinUI3;Control;winui3;Winui3;winui3;LazyRegion.Winui3</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/XAMLBaker/LazyRegion</PackageProjectUrl>
 
     <!-- XML 문서 포함 -->

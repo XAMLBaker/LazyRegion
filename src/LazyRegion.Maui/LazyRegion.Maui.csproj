@@ -16,6 +16,7 @@
     <Authors>lukewire</Authors>
     <Description>Content &lt;-&gt; Content 간의 애니메이션 처리 LazyRegion 컨트롤 for .NET MAUI</Description>
     <PackageTags>LazyRegion;Animation;MAUI;Control;Xamarin</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/XAMLBaker/LazyRegion</PackageProjectUrl>
 
     <!-- XML 문서 포함 -->

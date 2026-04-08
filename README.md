@@ -7,8 +7,12 @@
 [![NuGet](https://img.shields.io/nuget/v/LazyRegion.MAUI.svg)](https://www.nuget.org/packages/LazyRegion.MAUI/) 
 [![NuGet Downloads](https://img.shields.io/nuget/dt/LazyRegion.MAUI.svg)](https://www.nuget.org/packages/LazyRegion.MAUI/)
 
+**WinUI3**
+[![NuGet](https://img.shields.io/nuget/v/LazyRegion.WinUI3.svg)](https://www.nuget.org/packages/LazyRegion.WinUI3/) 
+[![NuGet Downloads](https://img.shields.io/nuget/dt/LazyRegion.WinUI3.svg)](https://www.nuget.org/packages/LazyRegion.WinUI3/)
+
 **LazyRegion**은 부드러운 전환 애니메이션과 MVVM 구조를 지원하는 화면 전환용 Region 라이브러리입니다.  
-WPF 및 .NET MAUI 환경 모두에서 사용할 수 있으며, Region 기반의 자연스러운 화면 전환과 상태 관리를 제공합니다.
+WPF 및 .NET MAUI, WinUI3 환경 모두에서 사용할 수 있으며, Region 기반의 자연스러운 화면 전환과 상태 관리를 제공합니다.
 
 ---
 

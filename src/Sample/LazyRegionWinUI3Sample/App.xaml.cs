@@ -27,6 +27,15 @@ namespace LazyRegionWinUI3Sample
                     lazy.Register<AControl> ("A");
                     lazy.Register<BControl> ("B");
                     lazy.Register<CControl> ("C");
+
+                    lazy.Configure (configure =>
+                    {
+                        configure.ForRegion ("MainRegion")
+                                .WithInitialFlow(flow =>
+                                {
+                                    flow.Show ("A");
+                                });
+                    });
                 });
         }
 

@@ -54,6 +54,8 @@ jobs:
     - name: Pack Libraries
       shell: bash
       run: |
+        dotnet pack -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out "src/LazyRegion.WinUI3/LazyRegion.WinUI3.csproj"
+
         dotnet pack -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out "src/LazyRegion.WPF/LazyRegion.WPF.csproj"
 
         dotnet pack -p:PackageVersion=${{ steps.get_version.outputs.VERSION }} -c Release -o out "src/LazyRegion.Maui/LazyRegion.Maui.csproj"
