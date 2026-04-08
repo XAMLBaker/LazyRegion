@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.WPF", "src\LazyR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.Maui", "src\LazyRegion.Maui\LazyRegion.Maui.csproj", "{1C029AD5-EE30-4AE1-B53C-5957166A4FC2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.WinUI3", "src\LazyRegion.WinUI3\LazyRegion.WinUI3.csproj", "{1C029AD5-EE30-4AE1-B53C-5957166A4FC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

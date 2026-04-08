@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="LazyRegionWinUI3Sample.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:LazyRegionWinUI3Sample"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:winui3="using:LazyRegion.WinUI3"
+    Title="LazyRegionWinUI3Sample"
+    mc:Ignorable="d">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <NavigationView
+        x:Name="NavView"
+        IsBackButtonVisible="Collapsed"
+        IsSettingsVisible="False"
+        PaneDisplayMode="Auto"
+        SelectionChanged="NavView_SelectionChanged">
+        <NavigationView.MenuItems>
+            <NavigationViewItem
+                Content="A"
+                Icon="Home"
+                Tag="A" />
+            <NavigationViewItem
+                Content="B"
+                Icon="Setting"
+                Tag="B" />
+            <NavigationViewItem
+                Content="C"
+                Icon="Rotate"
+                Tag="C" />
+        </NavigationView.MenuItems>
+        <winui3:LazyStage RegionName="MainRegion" />
+    </NavigationView>
+</Window>

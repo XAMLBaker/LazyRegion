@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "LazyRegionWinUI3Sample (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "LazyRegionWinUI3Sample (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

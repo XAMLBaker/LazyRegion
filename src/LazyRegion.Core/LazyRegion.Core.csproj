@@ -9,7 +9,7 @@
     <PackageId>LazyRegion</PackageId>
     <Authors>lukewire</Authors>
     <Description>Content &lt;-&gt; Content 간의 애니메이션 처리 LazyRegion 컨트롤</Description>
-    <PackageTags>LazyRegion;Animation;WPF;Control</PackageTags>
+    <PackageTags>LazyRegion;Animation;WPF;MAUI;WinUI3Control</PackageTags>
     <PackageProjectUrl>https://github.com/XAMLBaker/LazyRegion</PackageProjectUrl>
 
     <!-- XML 문서 포함 -->
@@ -27,6 +27,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="LazyRegion.WPF" />
     <InternalsVisibleTo Include="LazyRegion.Maui" />
+    <InternalsVisibleTo Include="LazyRegion.WinUI3" />
   </ItemGroup>
 
 </Project>

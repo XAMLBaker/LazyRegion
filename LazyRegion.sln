@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.3.11415.281
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37111.16 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.Core", "src\LazyRegion.Core\LazyRegion.Core.csproj", "{B0BEA3AE-E42A-4832-A0AA-5E4DA761F45A}"
 EndProject
@@ -36,6 +36,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegionItemsControlSample", "src\Sample\LazyRegionItemsControlSample\LazyRegionItemsControlSample.csproj", "{A33804E4-5C77-43C2-B80E-F1396B184991}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StaticSample", "src\Sample\StaticSample\StaticSample.csproj", "{70022332-FB3A-4541-807A-05087730980F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegion.WinUI3", "src\LazyRegion.WinUI3\LazyRegion.WinUI3.csproj", "{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyRegionWinUI3Sample", "src\Sample\LazyRegionWinUI3Sample\LazyRegionWinUI3Sample.csproj", "{71324BC5-AFE1-42EC-A135-CC5D44C71F53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -241,6 +245,30 @@ Global
 		{70022332-FB3A-4541-807A-05087730980F}.Release|x64.Build.0 = Release|Any CPU
 		{70022332-FB3A-4541-807A-05087730980F}.Release|x86.ActiveCfg = Release|Any CPU
 		{70022332-FB3A-4541-807A-05087730980F}.Release|x86.Build.0 = Release|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Debug|x64.Build.0 = Debug|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Debug|x86.Build.0 = Debug|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Release|x64.ActiveCfg = Release|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Release|x64.Build.0 = Release|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Release|x86.ActiveCfg = Release|Any CPU
+		{1FE9EC05-94D3-4F2F-8CDF-FEF7AB1EC0BF}.Release|x86.Build.0 = Release|Any CPU
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Debug|Any CPU.Build.0 = Debug|x64
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Debug|x64.ActiveCfg = Debug|x64
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Debug|x64.Build.0 = Debug|x64
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Debug|x86.ActiveCfg = Debug|x86
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Debug|x86.Build.0 = Debug|x86
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Release|Any CPU.ActiveCfg = Release|x64
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Release|Any CPU.Build.0 = Release|x64
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Release|x64.ActiveCfg = Release|x64
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Release|x64.Build.0 = Release|x64
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Release|x86.ActiveCfg = Release|x86
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -259,6 +287,7 @@ Global
 		{E7938EA6-69BB-420D-BE8F-64B0A057A7FF} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 		{A33804E4-5C77-43C2-B80E-F1396B184991} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 		{70022332-FB3A-4541-807A-05087730980F} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
+		{71324BC5-AFE1-42EC-A135-CC5D44C71F53} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96F9E939-F1E3-409C-BF26-593CAC1AEE7C}
