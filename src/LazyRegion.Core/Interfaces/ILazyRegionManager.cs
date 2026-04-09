@@ -51,7 +51,8 @@ public interface ILazyRegionManager : ILazyRegionManagerBase
     void RegisterView(
         string viewKey,
         ServiceLifetime lifetime,
-        LazyFactory factory);
+        LazyFactory factory,
+        Type? viewModelType = null);
 
     object GetView(string viewKey);
 }

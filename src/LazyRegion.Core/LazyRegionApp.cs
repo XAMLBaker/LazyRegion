@@ -33,6 +33,20 @@ namespace LazyRegion.Core
             return this;
         }
 
+        public LazyRegionApp RegisterWithViewModel<TView, TViewModel>(
+            string key,
+            ServiceLifetime lifetime = ServiceLifetime.Singleton)
+            where TView : class, new()
+            where TViewModel : class
+        {
+            lock (_lock)
+            {
+                ThrowIfInitialized ();
+                _viewRegistrations.Add (s => s.AddLazyViewWithViewModel<TView, TViewModel> (key, lifetime));
+            }
+            return this;
+        }
+
         public LazyRegionApp Register(
             string key,
             LazyFactory factory,

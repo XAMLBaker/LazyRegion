@@ -32,13 +32,15 @@ namespace LazyRegion.Core
         public void RegisterView(
             string viewKey,
             ServiceLifetime lifetime,
-            LazyFactory factory)
+            LazyFactory factory,
+            Type? viewModelType = null)
         {
             _views[viewKey] = new ViewRegistration
             {
                 ViewKey = viewKey,
                 Lifetime = lifetime,
-                Factory = factory
+                Factory = factory,
+                ViewModelType = viewModelType
             };
         }
 
@@ -110,7 +112,10 @@ namespace LazyRegion.Core
         {
             var context = new LazyNavigationContext(regionName, viewKey, parameters);
 
-            _regionViewModels.TryGetValue(regionName, out var oldVm);
+            var baseRegion = await LazyRegionRegistry.WaitForRegionAsync(regionName, timeout);
+
+            // 구 ViewModel: 플랫폼에서 직접 읽음 (Guard/OnNavigatedFrom 용)
+            var oldVm = (baseRegion as ILazyRegion)?.GetCurrentDataContext();
 
             if (oldVm is ILazyNavigationGuard guard)
             {
@@ -121,7 +126,6 @@ namespace LazyRegion.Core
             if (oldVm is ILazyNavigationAware oldAware)
                 oldAware.OnNavigatedFrom(context);
 
-            var baseRegion = await LazyRegionRegistry.WaitForRegionAsync(regionName, timeout);
             var view = GetOrCreate(viewKey);
 
             if (baseRegion is ILazyRegion region)
@@ -132,10 +136,13 @@ namespace LazyRegion.Core
                     region.Set(view, viewModel);
             }
 
-            if (viewModel is ILazyNavigationAware newAware)
+            // 신 ViewModel: 명시적 파라미터 우선, 없으면 플랫폼에서 읽음 (생성자 주입 포함)
+            var newVm = viewModel ?? (baseRegion as ILazyRegion)?.GetStagingDataContext();
+
+            if (newVm is ILazyNavigationAware newAware)
                 newAware.OnNavigatedTo(context);
 
-            _regionViewModels[regionName] = viewModel;
+            _regionViewModels[regionName] = newVm;
 
             // Track viewKeys for GoBack
             _currentViewKeys.TryGetValue(regionName, out var oldViewKey);

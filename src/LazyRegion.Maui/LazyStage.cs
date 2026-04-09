@@ -56,6 +56,8 @@ public class LazyStage : ContentView, ILazyRegion
     private ContentView _stagingPresenter;
     private bool _isNavigating;
     private TransitionAnimation? _animationOverride;
+    private object? _currentDataContext;
+    private object? _stagingDataContext;
 
     public LazyStage()
     {
@@ -158,14 +160,10 @@ public class LazyStage : ContentView, ILazyRegion
     // Public API similar to WPF Set
     public void Set(object content, object dataContext = null)
     {
-        if (dataContext != null)
-        {
-            // Store dataContext to apply after navigation completes
-            if (content is View view)
-            {
-                view.BindingContext = dataContext;
-            }
-        }
+        if (dataContext != null && content is View v)
+            v.BindingContext = dataContext;
+
+        _stagingDataContext = content is BindableObject bo ? bo.BindingContext : dataContext;
         RegionContent = content;
     }
 
@@ -174,6 +172,9 @@ public class LazyStage : ContentView, ILazyRegion
         _animationOverride = animationOverride;
         Set(content, dataContext);
     }
+
+    public object? GetCurrentDataContext() => _currentDataContext;
+    public object? GetStagingDataContext() => _stagingDataContext;
 
     private TransitionAnimation ResolveAnimation()
     {
@@ -396,6 +397,8 @@ public class LazyStage : ContentView, ILazyRegion
 
         // Swap presenters
         (_currentPresenter, _stagingPresenter) = (_stagingPresenter, _currentPresenter);
+        _currentDataContext = _stagingDataContext;
+        _stagingDataContext = null;
 
         // Batch all property changes on the new current presenter so MAUI applies
         // them as a single native update (prevents flicker from intermediate states

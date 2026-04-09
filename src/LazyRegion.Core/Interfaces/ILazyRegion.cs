@@ -12,6 +12,10 @@ public interface ILazyRegion : ILazyRegionBase
     TransitionAnimation CurrentAnimation { get; }
     void Set(object content = null, object dataContext = null);
     void Set(object content, object dataContext, TransitionAnimation? animationOverride);
+    /// <summary>현재 표시 중인 뷰의 DataContext (구 ViewModel) — Guard/OnNavigatedFrom 용</summary>
+    object? GetCurrentDataContext();
+    /// <summary>마지막으로 Set()된 뷰의 DataContext (신 ViewModel) — OnNavigatedTo 용</summary>
+    object? GetStagingDataContext();
 }
 
 

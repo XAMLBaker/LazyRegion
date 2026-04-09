@@ -17,6 +17,16 @@ namespace LazyRegion.Core
                     ActivatorUtilities.CreateInstance<T> (sp)));
         }
 
+        public void Add<TView, TViewModel>(string key, ServiceLifetime lifetime)
+            where TView : class, new()
+            where TViewModel : class
+        {
+            _registrations.Add (rm =>
+                rm.RegisterView (key, lifetime,
+                    sp => sp.GetService<TView> () ?? ActivatorUtilities.CreateInstance<TView> (sp),
+                    viewModelType: typeof (TViewModel)));
+        }
+
         public void Add(string key, LazyFactory factory,
                         ServiceLifetime lifetime = ServiceLifetime.Transient)
         {

@@ -67,6 +67,8 @@ public class LazyStage : Control, ILazyRegion
     private bool _isNavigating;
     private bool _isTemplateApplied;
     private TransitionAnimation? _animationOverride;
+    private object? _currentDataContext;
+    private object? _stagingDataContext;
 
     // Staging 방식: 현재 표시되는 presenter와 준비 중인 presenter
     private ContentControl _currentPresenter;
@@ -308,6 +310,9 @@ public class LazyStage : Control, ILazyRegion
         _currentPresenter.Visibility = Visibility.Visible;
         _stagingPresenter.Visibility = Visibility.Collapsed;
 
+        _currentDataContext = _stagingDataContext;
+        _stagingDataContext = null;
+
         _isNavigating = false;
     }
 
@@ -383,8 +388,12 @@ public class LazyStage : Control, ILazyRegion
         {
             element.DataContext = dataContext;
         }
+        _stagingDataContext = content is FrameworkElement fe ? fe.DataContext : dataContext;
         this.StageContent = content;
     }
+
+    public object? GetCurrentDataContext() => _currentDataContext;
+    public object? GetStagingDataContext() => _stagingDataContext;
 
     public void Set(object content, object dataContext, TransitionAnimation? animationOverride)
     {

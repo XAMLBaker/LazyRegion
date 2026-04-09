@@ -7,6 +7,7 @@ namespace LazyRegion.Core
     {
         public string ViewKey { get; set; } = null!;
         public Type? ViewType { get; set; }
+        public Type? ViewModelType { get; set; }
         public ServiceLifetime Lifetime { get; set; }
         public LazyFactory Factory { get; set; } = null!;
         public object? Instance { get; set; }

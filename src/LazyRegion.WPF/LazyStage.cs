@@ -54,6 +54,9 @@ public class LazyStage : ContentControl, ILazyRegion
     private ContentControl _currentPresenter;
     private ContentControl _stagingPresenter;
 
+    private object? _currentDataContext;
+    private object? _stagingDataContext;
+
     static LazyStage()
     {
         DefaultStyleKeyProperty.OverrideMetadata (typeof (LazyStage), new FrameworkPropertyMetadata (typeof (LazyStage)));
@@ -274,6 +277,8 @@ public class LazyStage : ContentControl, ILazyRegion
         _currentPresenter.Visibility = Visibility.Visible;
         _stagingPresenter.Visibility = Visibility.Hidden;
 
+        _currentDataContext = _stagingDataContext;
+        _stagingDataContext = null;
         _isNavigating = false;
     }
 
@@ -330,9 +335,9 @@ public class LazyStage : ContentControl, ILazyRegion
     public void Set(object content, object dataContext = null)
     {
         if (dataContext != null && content is FrameworkElement element)
-        {
             element.DataContext = dataContext;
-        }
+
+        _stagingDataContext = content is FrameworkElement fe ? fe.DataContext : dataContext;
         this.Content = content;
     }
 
@@ -341,6 +346,9 @@ public class LazyStage : ContentControl, ILazyRegion
         _animationOverride = animationOverride;
         Set(content, dataContext);
     }
+
+    public object? GetCurrentDataContext() => _currentDataContext;
+    public object? GetStagingDataContext() => _stagingDataContext;
 
     private TransitionAnimation ResolveAnimation()
     {

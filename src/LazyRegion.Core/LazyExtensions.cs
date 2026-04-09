@@ -20,6 +20,18 @@ namespace LazyRegion.Core
             return services;
         }
 
+        public static IServiceCollection AddLazyViewWithViewModel<TView, TViewModel>(
+            this IServiceCollection services,
+            string key,
+            ServiceLifetime lifetime = ServiceLifetime.Singleton)
+            where TView : class, new()
+            where TViewModel : class
+        {
+            services.Add (new ServiceDescriptor (typeof (TView), typeof (TView), lifetime));
+            _pending.Add (r => r.Add<TView, TViewModel> (key, lifetime));
+            return services;
+        }
+
         public static IServiceCollection AddLazyView(
             this IServiceCollection services,
             string key,
